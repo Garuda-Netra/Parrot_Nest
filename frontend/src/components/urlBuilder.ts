@@ -4,6 +4,8 @@ import { apiPost, apiDelete } from './api';
 import { recordUrlHistory, removeUrlHistoryByContext } from './history';
 
 export function initUrlBuilder() {
+  const previewBase = ((import.meta.env.VITE_APP_DOMAIN as string | undefined)?.trim() || window.location.origin).replace(/\/+$/, '');
+
   const destInput = document.getElementById('url-dest-input') as HTMLInputElement | null;
   const destMsg = document.getElementById('url-dest-msg') as HTMLParagraphElement | null;
   const destIcon = document.getElementById('url-dest-icon') as HTMLDivElement | null;
@@ -102,7 +104,7 @@ export function initUrlBuilder() {
     if (isDestValid) {
       previewPanel!.classList.remove('hidden');
       previewLongUrl!.textContent = `Redirects to: ${destInput!.value}`;
-      previewShortUrl!.textContent = `parrotclip.com/${slugInput!.value.trim() ? slugInput!.value.trim() : '[random]'}`;
+      previewShortUrl!.textContent = `${previewBase}/${slugInput!.value.trim() ? slugInput!.value.trim() : '[random]'}`;
     } else {
       previewPanel!.classList.add('hidden');
     }

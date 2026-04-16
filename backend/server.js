@@ -6,7 +6,6 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config({
   path: path.join(__dirname, '.env'),
-  override: true,
 });
 
 const connectDB = require('./config/db');

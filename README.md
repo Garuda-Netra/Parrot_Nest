@@ -1,89 +1,109 @@
 # ParrotNest
 
-ParrotNest is a privacy-first sharing tool with two simple flows:
-- ParrotClip: create a short-lived secure clip for text or files using a 4-digit code.
+ParrotNest is a privacy-first sharing tool with two flows:
+- ParrotClip: create short-lived secure clips (text/files) with a 4-digit code.
 - ParrotURL: create self-destructing short links with auto-generated QR codes.
 
-This project is designed to feel fast and simple for users while still enforcing safe backend defaults for production.
+The codebase is now split for independent deployment:
+- `frontend/` -> Vercel
+- `backend/` -> Render
 
-## What Matters Most
-- Self-destruct expiry for clips and short URLs.
-- Delete-token protected erase operations.
-- QR code generated automatically when a short URL is created.
-- Session-based local history in the browser.
-- Strict upload guardrails (allowed docs/text/source-code files only).
+## Project Structure
+- `frontend/`: Vite + TypeScript + Tailwind website app
+- `backend/`: Node.js + Express + MongoDB API
 
-## Stack
-- Frontend: Vite + TypeScript + Tailwind CSS
-- Backend: Node.js + Express + MongoDB (Mongoose)
+## Local Development
 
-## Quick Start
 ### 1) Install dependencies
 ```bash
+cd frontend
 npm install
-cd backend
+
+cd ../backend
 npm install
 ```
 
-### 2) Configure environment
-Copy and edit environment values:
+### 2) Configure environment files
+
+Backend:
 ```bash
 cd backend
 copy .env.example .env
 ```
 
-Required variables:
-- MONGO_URI
-- BASE_URL
-- PORT
-- CORS_ORIGINS
-- RATE_LIMIT_REQUESTS
-- RATE_LIMIT_WINDOW_SECONDS
+Frontend:
+```bash
+cd frontend
+copy .env.example .env.local
+```
 
-For frontend, optional:
-- VITE_API_BASE_URL (set this when frontend and backend are on different hosts)
+Set these values:
+- Backend `.env`
+	- `MONGO_URI`
+	- `BASE_URL` (local: `http://localhost:5000`)
+	- `PORT`
+	- `CORS_ORIGINS` (local frontend: `http://localhost:5173`)
+	- `RATE_LIMIT_REQUESTS`
+	- `RATE_LIMIT_WINDOW_SECONDS`
+- Frontend `.env.local`
+	- `VITE_API_BASE_URL` (local backend: `http://localhost:5000`)
+	- `VITE_APP_DOMAIN` (optional, local frontend URL)
 
-### 3) Run locally
+### 3) Run apps
+
 Terminal 1:
 ```bash
+cd backend
 npm run dev
 ```
 
 Terminal 2:
 ```bash
-cd backend
+cd frontend
 npm run dev
 ```
 
-Frontend default: http://localhost:5173  
-Backend default: http://localhost:5000
+Local URLs:
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:5000`
+
+## Deploy Backend on Render
+
+Use `render.yaml` from repo root or configure manually with:
+- Root directory: `backend`
+- Build command: `npm install`
+- Start command: `npm start`
+
+Render environment variables:
+- `MONGO_URI` = your MongoDB Atlas URI
+- `BASE_URL` = your Render backend URL
+- `CORS_ORIGINS` = your Vercel frontend URL
+- `RATE_LIMIT_REQUESTS` = `100`
+- `RATE_LIMIT_WINDOW_SECONDS` = `900`
+- `PORT` = `5000`
+
+## Deploy Frontend on Vercel
+
+Set project root directory to `frontend`.
+
+Vercel environment variables:
+- `VITE_API_BASE_URL` = your Render backend URL
+- `VITE_APP_DOMAIN` = your Vercel frontend URL (optional)
+
+`frontend/src/components/api.ts` is configured to fail fast in production if `VITE_API_BASE_URL` is missing.
 
 ## Core API Routes
-### Clip
-- POST /api/clip/create
-- GET /api/clip/:code
-- DELETE /api/clip/:code
-- GET /api/clip/download/:fileName
 
-### URL
-- POST /api/url/shorten
-- DELETE /api/url/:shortId
-- GET /:shortId
+Clip:
+- `POST /api/clip/create`
+- `GET /api/clip/:code`
+- `DELETE /api/clip/:code`
+- `GET /api/clip/download/:fileName`
 
-## Production Checklist
-- Rotate database credentials before deployment.
-- Keep backend/.env out of version control.
-- Set explicit CORS_ORIGINS (do not use * in production).
-- Set BASE_URL to the real public backend URL.
-- Build frontend with:
-```bash
-npm run build
-```
-- Start backend with:
-```bash
-cd backend
-npm run start
-```
+URL:
+- `POST /api/url/shorten`
+- `DELETE /api/url/:shortId`
+- `GET /:shortId`
 
 ## Known Limits
 - Clip code is 4 digits.

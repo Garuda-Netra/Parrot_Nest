@@ -242,6 +242,7 @@ exports.shortenUrl = async (req, res, next) => {
         width: 220,
         margin: 1,
       });
+
     } catch (qrErr) {
       console.warn(`⚠️  QR generation failed for shortId=${url.shortId}: ${qrErr.message}`);
       qrCodeDataUri = '';

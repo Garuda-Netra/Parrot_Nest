@@ -8,12 +8,12 @@ function resolveApiBase() {
     return sanitizeBaseUrl(envBase);
   }
 
-  if (typeof window !== 'undefined') {
-    if (window.location.port === '5173') {
-      return `${window.location.protocol}//${window.location.hostname}:5000`;
-    }
+  if (import.meta.env.PROD) {
+    throw new Error('VITE_API_BASE_URL is required in production. Set it in Vercel project environment variables.');
+  }
 
-    return window.location.origin;
+  if (typeof window !== 'undefined') {
+    return `${window.location.protocol}//${window.location.hostname}:5000`;
   }
 
   return 'http://localhost:5000';
