@@ -275,21 +275,6 @@ export function removeClipHistoryByCode(code: string) {
   });
 }
 
-export function removeUrlHistoryByShortId(shortId: string) {
-  if (!shortId) {
-    return;
-  }
-
-  removeHistoryItem({
-    type: 'url',
-    shortId,
-    shortUrl: '',
-    originalUrl: '',
-    createdAt: '',
-    deleteToken: '',
-  });
-}
-
 export function removeUrlHistoryByContext(context: {
   shortId?: string;
   deleteToken?: string;

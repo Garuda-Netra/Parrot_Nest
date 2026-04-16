@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "Prince",
@@ -19,6 +19,7 @@
     "mongoose": "^9.4.1",
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
+    "nodemon": "^3.1.14",
     "qrcode": "^1.5.4"
   }
 }
