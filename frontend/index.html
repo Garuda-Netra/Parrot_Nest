@@ -2,9 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/assets/parrot-falcon.svg" />
+    <link rel="icon" type="image/png" href="/assets/parrot.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ParrotClip | Secure • Fast • Private</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <title>ParrotNest | Secure • Fast • Private</title>
   </head>
   <body class="overflow-x-hidden flex flex-col min-h-screen">
     <div id="app" class="flex-grow flex flex-col relative z-10 w-full max-w-[1440px] mx-auto px-6 py-6 md:px-12 lg:py-12">
@@ -16,7 +19,7 @@
           <div id="toggle-indicator" class="absolute left-1.5 top-1.5 bottom-1.5 w-[calc(50%-0.375rem)] bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)] rounded-full transition-all duration-300 ease-in-out"></div>
           
           <button id="toggle-parrotclip" class="relative z-10 px-6 py-2 rounded-full text-sm font-medium transition-colors duration-300 text-gold-glow">
-            ParrotClip
+            ParrotNest
           </button>
           <button id="toggle-urlshortener" class="relative z-10 px-6 py-2 rounded-full text-sm font-medium transition-colors duration-300 text-gray-400 hover:text-white">
             ParrotURL
@@ -38,7 +41,7 @@
             <div class="parrot-body">
               <img 
                 src="/assets/parrot.png" 
-                alt="Scarlet Macaw — ParrotClip mascot" 
+                alt="Scarlet Macaw — ParrotNest mascot" 
                 class="parrot-img"
                 draggable="false"
               />
@@ -51,7 +54,7 @@
           </div>
           
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold tracking-wider text-gold-muted uppercase">
-            <span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span>
+            <span class="w-2 h-2 rounded-full bg-green-500 status-dot-alive"></span>
             Secure • Fast • Private
           </div>
           
@@ -94,7 +97,8 @@
 
                 <!-- Snippet Mode -->
                 <div id="mode-snippet" class="flex-grow flex flex-col relative mb-4 block">
-                  <textarea id="snippet-textarea" class="glass-input flex-grow w-full rounded-2xl p-4 resize-none h-[180px]" placeholder="Paste your secret text here…"></textarea>
+                  <label for="snippet-textarea" class="sr-only">Secret text snippet</label>
+                  <textarea id="snippet-textarea" name="snippet" class="glass-input flex-grow w-full rounded-2xl p-4 resize-none h-[180px]" placeholder="Paste your secret text here…"></textarea>
                   <div class="absolute bottom-4 right-4 text-xs text-gray-500 bg-background/80 px-2 py-1 rounded backdrop-blur">
                     <span id="char-counter">0</span> / 5000
                   </div>
@@ -105,7 +109,7 @@
                   <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                   <p class="text-gray-300 font-medium text-center">Click to upload or drag & drop a file</p>
                   <p class="text-xs text-gray-500 mt-2">Max file size: 10MB</p>
-                  <input id="file-input" type="file" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  <input id="file-input" name="files" type="file" multiple aria-label="Upload files" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                 </div>
 
                 <!-- Folder Mode -->
@@ -113,7 +117,7 @@
                   <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
                   <p class="text-gray-300 font-medium text-center">Click to upload or drag & drop a folder</p>
                   <p class="text-xs text-gray-500 mt-2">Multiple files supported (Max total 10MB)</p>
-                  <input id="folder-input" type="file" webkitdirectory directory multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  <input id="folder-input" name="folderFiles" type="file" webkitdirectory directory multiple aria-label="Upload folder files" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                 </div>
 
                 <!-- Selected Files List Queue -->
@@ -153,10 +157,10 @@
                 </div>
 
                 <div class="flex justify-center gap-3 md:gap-4 mb-8">
-                  <input type="text" maxlength="1" class="otp-input w-14 h-16 md:w-16 md:h-18 text-center text-3xl font-bold glass-input rounded-xl" inputmode="numeric" />
-                  <input type="text" maxlength="1" class="otp-input w-14 h-16 md:w-16 md:h-18 text-center text-3xl font-bold glass-input rounded-xl" inputmode="numeric" />
-                  <input type="text" maxlength="1" class="otp-input w-14 h-16 md:w-16 md:h-18 text-center text-3xl font-bold glass-input rounded-xl" inputmode="numeric" />
-                  <input type="text" maxlength="1" class="otp-input w-14 h-16 md:w-16 md:h-18 text-center text-3xl font-bold glass-input rounded-xl" inputmode="numeric" />
+                  <input id="otp-digit-1" name="otp1" type="text" maxlength="1" aria-label="OTP digit 1" class="otp-input w-14 h-16 md:w-16 md:h-18 text-center text-3xl font-bold glass-input rounded-xl" inputmode="numeric" />
+                  <input id="otp-digit-2" name="otp2" type="text" maxlength="1" aria-label="OTP digit 2" class="otp-input w-14 h-16 md:w-16 md:h-18 text-center text-3xl font-bold glass-input rounded-xl" inputmode="numeric" />
+                  <input id="otp-digit-3" name="otp3" type="text" maxlength="1" aria-label="OTP digit 3" class="otp-input w-14 h-16 md:w-16 md:h-18 text-center text-3xl font-bold glass-input rounded-xl" inputmode="numeric" />
+                  <input id="otp-digit-4" name="otp4" type="text" maxlength="1" aria-label="OTP digit 4" class="otp-input w-14 h-16 md:w-16 md:h-18 text-center text-3xl font-bold glass-input rounded-xl" inputmode="numeric" />
                 </div>
 
                 <button id="btn-fetch-clip" class="glass-btn-primary w-full py-4 rounded-2xl font-bold text-lg mb-6 flex items-center justify-center gap-2">
@@ -198,9 +202,9 @@
                 
                 <!-- 1. Destination URL Input -->
                 <div class="mb-4 relative">
-                  <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Destination URL</label>
+                  <label for="url-dest-input" class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Destination URL</label>
                   <div class="relative">
-                    <input id="url-dest-input" type="url" class="glass-input w-full rounded-xl p-3 pl-4 pr-10 text-sm" placeholder="Paste your long URL here (https://...)" />
+                    <input id="url-dest-input" name="destinationUrl" type="url" class="glass-input w-full rounded-xl p-3 pl-4 pr-10 text-sm" placeholder="Paste your long URL here (https://...)" />
                     <div id="url-dest-icon" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 opacity-0 transition-opacity duration-200">
                       <!-- Validation icon injected here -->
                     </div>
@@ -210,7 +214,7 @@
 
                 <!-- 2. Custom Slug Builder -->
                 <div class="mb-4">
-                  <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider flex items-center justify-between">
+                  <label for="url-slug-input" class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider flex items-center justify-between">
                     <span>Custom Slug</span>
                     <span id="slug-indicator" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/5 opacity-0 transition-opacity"></span>
                   </label>
@@ -218,7 +222,7 @@
                     <span class="inline-flex items-center px-3 text-sm text-gray-400 bg-white/5 border border-white/10 rounded-l-xl border-r-0 whitespace-nowrap">
                       parrotclip.com/
                     </span>
-                    <input id="url-slug-input" type="text" class="glass-input w-full border border-white/10 rounded-r-xl rounded-l-none p-3 text-sm" placeholder="custom-name (optional)" />
+                    <input id="url-slug-input" name="customSlug" type="text" class="glass-input w-full border border-white/10 rounded-r-xl rounded-l-none p-3 text-sm" placeholder="custom-name (optional)" />
                   </div>
                   <p id="url-slug-msg" class="text-[10px] sm:text-xs text-red-400 mt-1.5 h-4 opacity-0 transition-opacity"></p>
                 </div>
@@ -258,35 +262,37 @@
               </div>
 
               <!-- 6. Result Display (Initially Hidden) -->
-              <div id="url-result-section" class="hidden flex-col items-center justify-center absolute inset-0 bg-darkUI-deep/90 backdrop-blur-md rounded-[30px] p-6 text-center animate-fade-slide z-20">
-                <svg class="w-16 h-16 text-green-400 mb-4 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] animate-slide-up" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                
-                <h3 class="text-2xl font-bold text-white mb-2">URL Compacted!</h3>
-                <p class="text-xs text-gray-400 mb-6">Your link is ready to be shared with the world.</p>
-                
-                <div class="glass-input bg-white/5 border-white/10 w-full p-4 rounded-xl flex items-center justify-between mb-8 shadow-inner shadow-black/50">
-                  <span id="result-short-url" class="text-gold-glow font-medium text-sm truncate mr-2 select-all"></span>
-                  <button id="btn-copy" class="text-gray-400 hover:text-white transition-colors p-1" title="Copy to clipboard">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                  </button>
-                </div>
+              <div id="url-result-section" class="hidden flex-col absolute inset-0 bg-darkUI-deep/90 backdrop-blur-md rounded-[30px] p-4 sm:p-6 text-center animate-fade-slide z-20 overflow-y-auto">
+                <div class="w-full max-w-xl mx-auto my-auto py-1 sm:py-3 flex flex-col items-center">
+                  <svg class="w-14 h-14 sm:w-16 sm:h-16 text-green-400 mb-4 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] animate-slide-up" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  
+                  <h3 class="text-xl sm:text-2xl font-bold text-white mb-2">URL Compacted!</h3>
+                  <p class="text-xs text-gray-400 mb-4 sm:mb-6">Your link is ready to be shared with the world.</p>
+                  
+                  <div class="glass-input bg-white/5 border-white/10 w-full p-3 sm:p-4 rounded-xl flex items-center justify-between mb-6 sm:mb-8 shadow-inner shadow-black/50">
+                    <span id="result-short-url" class="text-gold-glow font-medium text-sm truncate mr-2 select-all"></span>
+                    <button id="btn-copy" class="text-gray-400 hover:text-white transition-colors p-1" title="Copy to clipboard">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                    </button>
+                  </div>
 
-                <div id="result-qr-wrap" class="hidden w-full mb-8 flex flex-col items-center gap-2">
-                  <p class="text-[11px] text-gray-400 tracking-wide uppercase">Scan QR to open link</p>
-                  <img id="result-qr-code" class="w-44 h-44 rounded-xl border border-white/10 bg-white p-2" alt="Generated QR code for shortened URL" />
-                </div>
+                  <div id="result-qr-wrap" class="hidden w-full mb-6 sm:mb-8 flex flex-col items-center gap-2">
+                    <p class="text-[11px] text-gray-400 tracking-wide uppercase">Scan QR to open link</p>
+                    <img id="result-qr-code" class="w-36 h-36 sm:w-44 sm:h-44 rounded-xl border border-white/10 bg-white p-2" alt="Generated QR code for shortened URL" />
+                  </div>
 
-                <div class="flex flex-wrap items-center justify-center gap-3">
-                  <button id="btn-url-vanish-now" class="glass-btn px-6 py-2.5 rounded-full text-sm font-semibold text-red-300 border-red-500/30 hover:text-red-200 hover:border-red-400/40">
-                    Execute Vanish Protocol
-                  </button>
-                  <button id="btn-back-to-url-form" class="glass-btn px-6 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    Back to URL Builder
-                  </button>
-                  <button id="btn-shorten-another" class="glass-btn px-6 py-2.5 rounded-full text-sm font-semibold">
-                    Shorten Another URL
-                  </button>
+                  <div class="flex w-full flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-center gap-2 sm:gap-3">
+                    <button id="btn-url-vanish-now" class="glass-btn w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-full text-sm font-semibold text-red-300 border-red-500/30 hover:text-red-200 hover:border-red-400/40">
+                      Execute Vanish Protocol
+                    </button>
+                    <button id="btn-back-to-url-form" class="glass-btn w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-full text-sm font-semibold flex items-center justify-center gap-2">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                      Back to URL Builder
+                    </button>
+                    <button id="btn-shorten-another" class="glass-btn w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-full text-sm font-semibold">
+                      Shorten Another URL
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -310,7 +316,13 @@
           </button>
         </div>
 
-        <p class="text-xs text-gray-400 mb-4">Showing clips and short links created in this browser session.</p>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
+          <p class="text-xs text-gray-400">Showing clips and short links created in this browser session.</p>
+          <button id="btn-purge-all-history" class="glass-btn border-red-500/30 text-red-300 hover:text-red-200 hover:border-red-400/40 px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 whitespace-nowrap shrink-0 hidden">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            Purge All Records
+          </button>
+        </div>
 
         <p id="history-empty" class="hidden text-sm text-gray-400 text-center py-10">No history yet. Create a clip or short URL to see it here.</p>
         <div id="history-list" class="flex flex-col gap-3 overflow-y-auto pr-1"></div>

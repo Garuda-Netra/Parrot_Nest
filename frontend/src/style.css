@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,18 +5,18 @@
 @layer base {
   body {
     @apply font-sans antialiased text-parchment-light min-h-screen selection:bg-gold-muted/30 selection:text-gold-glow;
-    background: linear-gradient(rgba(10, 10, 10, 0.75), rgba(18, 18, 18, 0.85)), url('/parchment-bg.png');
+    background: linear-gradient(rgba(10, 10, 10, 0.8), rgba(18, 18, 18, 0.9)), url('/ancient-bg.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-attachment: scroll;
+    background-attachment: fixed;
     background-blend-mode: overlay;
   }
 }
 
 @layer utilities {
   .glass-card {
-    @apply bg-darkUI-glass backdrop-blur-2xl border border-white/10 shadow-2xl rounded-[30px];
+    @apply bg-darkUI-glass backdrop-blur-xl border border-white/10 shadow-2xl rounded-[30px];
   }
   
   .glass-input {
@@ -26,11 +24,138 @@
   }
 
   .glass-btn {
-    @apply relative overflow-hidden bg-white/5 border border-white/10 hover:border-gold-muted/50 text-parchment hover:text-gold-glow hover:bg-gold-muted/10 transition-all duration-300 shadow-[0_0_15px_rgba(207,174,123,0.0)] hover:shadow-[0_0_25px_rgba(207,174,123,0.15)];
+    @apply relative overflow-hidden border text-parchment transition-all duration-300 cursor-pointer;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 50%, rgba(0,0,0,0.05) 100%);
+    border-color: rgba(255,255,255,0.12);
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.15),
+      inset 0 -1px 2px rgba(0,0,0,0.2),
+      0 2px 8px rgba(0,0,0,0.3),
+      0 0 0 0 rgba(207,174,123,0);
+  }
+
+  .glass-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 100%);
+    border-radius: inherit;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .glass-btn::after {
+    content: '';
+    position: absolute;
+    top: 15%;
+    left: 20%;
+    width: 25%;
+    height: 20%;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    transition: all 0.4s ease;
+    filter: blur(2px);
+  }
+
+  .glass-btn:hover {
+    border-color: rgba(207,174,123,0.45);
+    color: #E2C288;
+    background: linear-gradient(180deg, rgba(207,174,123,0.15) 0%, rgba(207,174,123,0.05) 50%, rgba(0,0,0,0.08) 100%);
+    box-shadow:
+      inset 0 1px 2px rgba(255,255,255,0.2),
+      inset 0 -1px 3px rgba(0,0,0,0.25),
+      0 4px 16px rgba(207,174,123,0.15),
+      0 0 20px rgba(207,174,123,0.08);
+    transform: translateY(-1px);
+  }
+
+  .glass-btn:hover::after {
+    top: 12%;
+    left: 25%;
+    opacity: 0.9;
+  }
+
+  .glass-btn:active {
+    transform: translateY(0.5px);
+    box-shadow:
+      inset 0 2px 4px rgba(0,0,0,0.3),
+      inset 0 -1px 1px rgba(255,255,255,0.1),
+      0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  .glass-btn:active::before {
+    opacity: 0.4;
   }
 
   .glass-btn-primary {
-    @apply relative overflow-hidden bg-gold-muted/20 border border-gold-muted/40 text-gold-glow hover:bg-gold-muted/30 transition-all duration-300 shadow-[0_0_15px_rgba(207,174,123,0.1)] hover:shadow-[0_0_30px_rgba(207,174,123,0.3)];
+    @apply relative overflow-hidden border text-gold-glow transition-all duration-300 cursor-pointer;
+    background: linear-gradient(180deg, rgba(207,174,123,0.28) 0%, rgba(207,174,123,0.15) 50%, rgba(180,140,80,0.08) 100%);
+    border-color: rgba(207,174,123,0.45);
+    box-shadow:
+      inset 0 1px 2px rgba(255,255,255,0.2),
+      inset 0 -2px 4px rgba(0,0,0,0.15),
+      0 3px 12px rgba(207,174,123,0.15),
+      0 0 20px rgba(207,174,123,0.08);
+  }
+
+  .glass-btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%);
+    border-radius: inherit;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .glass-btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 12%;
+    left: 18%;
+    width: 30%;
+    height: 22%;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    transition: all 0.4s ease;
+    filter: blur(3px);
+  }
+
+  .glass-btn-primary:hover {
+    background: linear-gradient(180deg, rgba(207,174,123,0.38) 0%, rgba(207,174,123,0.2) 50%, rgba(180,140,80,0.12) 100%);
+    border-color: rgba(226,194,136,0.6);
+    box-shadow:
+      inset 0 1px 3px rgba(255,255,255,0.25),
+      inset 0 -2px 5px rgba(0,0,0,0.2),
+      0 6px 24px rgba(207,174,123,0.25),
+      0 0 35px rgba(207,174,123,0.15);
+    transform: translateY(-1px);
+  }
+
+  .glass-btn-primary:hover::after {
+    top: 10%;
+    left: 22%;
+    opacity: 0.95;
+  }
+
+  .glass-btn-primary:active {
+    transform: translateY(0.5px);
+    box-shadow:
+      inset 0 3px 6px rgba(0,0,0,0.3),
+      inset 0 -1px 2px rgba(255,255,255,0.1),
+      0 1px 6px rgba(207,174,123,0.1);
+  }
+
+  .glass-btn-primary:active::before {
+    opacity: 0.5;
   }
 
   .url-liquid-btn {
@@ -95,7 +220,45 @@
   }
 
   .url-liquid-btn:active {
-    transform: translateY(0);
+    transform: translateY(0.5px);
+    box-shadow:
+      inset 0 2px 5px rgba(0,0,0,0.3),
+      inset 0 -1px 1px rgba(255,255,255,0.08),
+      0 1px 4px rgba(6,182,212,0.1);
+  }
+
+  /* ── Living Status Dot ────────────────────────────── */
+  .status-dot-alive {
+    position: relative;
+    animation: dotPulse 2s ease-in-out infinite;
+  }
+
+  .status-dot-alive::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.4);
+    animation: dotRipple 2s ease-out infinite;
+  }
+
+  .status-dot-alive::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.15);
+    animation: dotRipple 2s ease-out infinite 0.4s;
+  }
+
+  @keyframes dotPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 8px rgba(34,197,94,0.8); }
+    50%      { transform: scale(1.25); box-shadow: 0 0 16px rgba(34,197,94,1), 0 0 30px rgba(34,197,94,0.4); }
+  }
+
+  @keyframes dotRipple {
+    0%   { transform: scale(0.5); opacity: 1; }
+    100% { transform: scale(2.5); opacity: 0; }
   }
 
   /* Scrollbar */
@@ -181,189 +344,187 @@
 
 /* ── Container (floating) ────────────────────────── */
 .parrot-container {
-  animation: parrotFloat 4.5s ease-in-out infinite;
+  animation: parrotFloat 8s ease-in-out infinite;
   will-change: transform;
   z-index: 2;
+  border-radius: 50%;
+  position: relative;
 }
 
 @keyframes parrotFloat {
   0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-14px); }
+  50%      { transform: translateY(-3px); }
 }
 
 /* ── Ambient glow behind the parrot ──────────────── */
 .parrot-glow {
   position: absolute;
-  inset: -20%;
+  inset: -15%;
   border-radius: 50%;
   background: radial-gradient(
-    ellipse at center,
-    rgba(207, 174, 123, 0.18) 0%,
-    rgba(226, 130, 50, 0.10) 35%,
-    rgba(180, 60, 30, 0.05) 60%,
-    transparent 80%
+    circle at center,
+    rgba(226, 130, 50, 0.4) 0%,
+    rgba(207, 174, 123, 0.15) 40%,
+    rgba(180, 60, 30, 0.05) 65%,
+    transparent 85%
   );
-  filter: blur(40px);
+  filter: blur(18px);
   pointer-events: none;
-  animation: glowPulse 6s ease-in-out infinite;
+  animation: glowPulse 5s ease-in-out infinite alternate;
   z-index: 0;
 }
 
 @keyframes glowPulse {
-  0%, 100% { opacity: 0.7; transform: scale(1); }
-  50%      { opacity: 1;   transform: scale(1.08); }
+  0%   { opacity: 0.6; transform: scale(0.95); }
+  100% { opacity: 1;   transform: scale(1.05); }
 }
 
-/* ── Body wrapper (micro-rotation / sway) ────────── */
+/* ── Body wrapper (breathing) ────────── */
 .parrot-body {
   position: relative;
   width: 100%;
   height: 100%;
-  transition: transform 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 1;
+  border-radius: 50%;
+  animation: breathe 6s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scaleY(1) scaleX(1); }
+  50%      { transform: scaleY(1.015) scaleX(0.995); }
 }
 
 /* ── The parrot image itself ─────────────────────── */
 .parrot-img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  filter:
-    drop-shadow(0 20px 30px rgba(0, 0, 0, 0.6))
-    drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+  object-fit: cover;
+  border-radius: 50%;
   user-select: none;
   -webkit-user-drag: none;
-  /* Radial mask — reveals the parrot while seamlessly blending
-     the dark image background into the page */
+  /* Smooth circular mask to blend the square image nicely */
   -webkit-mask-image: radial-gradient(
-    ellipse 62% 70% at 46% 45%,
-    black 38%,
-    rgba(0,0,0,0.65) 52%,
-    rgba(0,0,0,0.2) 68%,
-    transparent 82%
+    circle at center,
+    black 66%,
+    rgba(0,0,0,0.8) 72%,
+    transparent 85%
   );
   mask-image: radial-gradient(
-    ellipse 62% 70% at 46% 45%,
-    black 38%,
-    rgba(0,0,0,0.65) 52%,
-    rgba(0,0,0,0.2) 68%,
-    transparent 82%
+    circle at center,
+    black 66%,
+    rgba(0,0,0,0.8) 72%,
+    transparent 85%
   );
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
+  animation: subtleSway 10s ease-in-out infinite;
+}
+
+@keyframes subtleSway {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(0.5deg); }
+  75%      { transform: rotate(-0.5deg); }
 }
 
 /* Edge glow to integrate with UI theme */
 .parrot-container::after {
   content: '';
   position: absolute;
-  inset: 5%;
+  inset: 0;
   border-radius: 50%;
   background: transparent;
   box-shadow:
-    0 0 60px 8px rgba(207, 174, 123, 0.06),
-    0 0 120px 20px rgba(226, 130, 50, 0.03);
+    inset 0 0 20px 2px rgba(207, 174, 123, 0.1),
+    inset 0 -10px 30px rgba(0,0,0,0.4);
   pointer-events: none;
   z-index: 3;
-  animation: edgeGlow 5s ease-in-out infinite alternate;
-}
-
-@keyframes edgeGlow {
-  0%   { opacity: 0.4; }
-  100% { opacity: 1; }
 }
 
 /* ── Shimmer / feather highlight ─────────────────── */
 .parrot-shimmer {
   position: absolute;
   inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    120deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.06) 45%,
-    rgba(255, 225, 160, 0.08) 50%,
-    rgba(255, 255, 255, 0.06) 55%,
-    transparent 70%
-  );
-  background-size: 250% 100%;
-  background-position: 100% 0;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 4;
-  transition: opacity 0.3s ease;
-}
-
-.parrot-container.shimmer-active .parrot-shimmer {
-  opacity: 1;
-  animation: shimmerPass 1.6s ease-in-out;
-}
-
-@keyframes shimmerPass {
-  0%   { background-position: 100% 0; }
-  100% { background-position: -50% 0; }
-}
-
-/* ── Ground shadow ───────────────────────────────── */
-.parrot-ground-shadow {
-  position: absolute;
-  bottom: -8%;
-  left: 15%;
-  width: 70%;
-  height: 12%;
   border-radius: 50%;
   background: radial-gradient(
-    ellipse at center,
-    rgba(0, 0, 0, 0.45) 0%,
-    rgba(0, 0, 0, 0.15) 50%,
-    transparent 80%
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 225, 160, 0.05) 20%,
+    transparent 50%
   );
-  filter: blur(8px);
+  mix-blend-mode: overlay;
+  opacity: 0.5;
   pointer-events: none;
-  z-index: 0;
-  animation: shadowPulse 4.5s ease-in-out infinite;
+  z-index: 4;
+  animation: shimmerGlow 7s ease-in-out infinite alternate;
 }
 
-/* Shadow shrinks when parrot floats up */
-@keyframes shadowPulse {
-  0%, 100% { transform: scaleX(1)   scaleY(1);   opacity: 0.8; }
-  50%      { transform: scaleX(0.85) scaleY(0.7); opacity: 0.5; }
+@keyframes shimmerGlow {
+  0% { opacity: 0.3; transform: scale(0.9); }
+  100% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* ── Particles Layer for 'Alive' Magic Effect ───────────── */
+.parrot-particles {
+  position: absolute;
+  inset: -20%;
+  border-radius: 50%;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 70%);
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #ffcc70;
+  border-radius: 50%;
+  box-shadow: 0 0 6px 1px #ffcc70, 0 0 10px 1px #ff7b00;
+  opacity: 0;
+  animation: floatParticle 4s linear infinite;
+}
+
+@keyframes floatParticle {
+  0% { transform: translateY(20px) translateX(0) scale(0); opacity: 0; }
+  20% { opacity: 1; scale: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(-80px) translateX(15px) scale(0); opacity: 0; }
 }
 
 /* ── Hover interactivity ─────────────────────────── */
 .parrot-container:hover .parrot-img {
-  filter:
-    drop-shadow(0 25px 35px rgba(0, 0, 0, 0.7))
-    drop-shadow(0 5px 15px rgba(0, 0, 0, 0.5))
-    brightness(1.08);
-  transition: filter 0.6s ease;
+  transform: scale(1.02);
+  filter: brightness(1.15) saturate(1.1);
+  transition: transform 0.6s ease, filter 0.6s ease;
 }
 
 .parrot-container:hover .parrot-glow {
   opacity: 1;
-  transform: scale(1.15);
+  transform: scale(1.1);
   transition: all 0.8s ease;
 }
 
 /* ── Responsive adjustments ──────────────────────── */
 @media (max-width: 768px) {
+  body {
+    background-attachment: scroll;
+  }
+
   .parrot-container {
     margin-left: auto;
     margin-right: auto;
-  }
-  
-  @keyframes parrotFloat {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-10px); }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .parrot-container,
   .parrot-glow,
-  .parrot-ground-shadow,
+  .parrot-img,
+  .parrot-body,
+  .parrot-particles,
   .parrot-container::after {
     animation: none !important;
-  }
-  .parrot-body {
-    transition: none !important;
   }
 }

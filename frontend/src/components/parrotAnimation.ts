@@ -1,45 +1,90 @@
 /**
  * ParrotAnimation — brings the hero parrot to life with
- * subtle body sway and occasional feather adjustment.
- *
- * All animations use CSS custom properties and classes so the
- * visual details stay in the stylesheet.
+ * ambient magic particles, while CSS handles the smooth breathing.
  */
 
 export function initParrotAnimation(): void {
-  const parrotEl = document.getElementById('parrot-alive') as HTMLElement | null;
+  const parrotEl = document.getElementById('parrot-alive');
   if (!parrotEl) return;
 
-  const bodyEl = parrotEl.querySelector('.parrot-body') as HTMLElement | null;
+  const MAX_PARTICLES = 8;
+  const SPAWN_INTERVAL_MS = 650;
+  const SPAWN_WINDOW_MS = 10_000;
 
-  // ── Subtle body sway (micro-rotation) ──────────────
-  function scheduleBodyAdjust() {
-    const next = 4000 + Math.random() * 6000; // 4–10s
-    setTimeout(() => {
-      if (bodyEl) {
-        // Random micro-rotation between -2 and +2 degrees
-        const angle = (Math.random() - 0.5) * 4; // ± 2°
-        const shiftX = (Math.random() - 0.5) * 3; // ± 1.5px
-        bodyEl.style.transform = `rotate(${angle}deg) translateX(${shiftX}px)`;
-
-        // Return to neutral after 1.2s
-        setTimeout(() => {
-          bodyEl.style.transform = 'rotate(0deg) translateX(0px)';
-        }, 1200);
-      }
-      scheduleBodyAdjust();
-    }, next);
+  // Add the particles container if it doesn't exist
+  let particlesContainer = parrotEl.querySelector('.parrot-particles');
+  if (!particlesContainer) {
+    particlesContainer = document.createElement('div');
+    particlesContainer.className = 'parrot-particles';
+    parrotEl.appendChild(particlesContainer);
   }
-  scheduleBodyAdjust();
 
-  // ── Occasional highlight shimmer ───────────────────
-  function scheduleShimmer() {
-    const next = 6000 + Math.random() * 8000; // 6–14s
-    setTimeout(() => {
-      parrotEl!.classList.add('shimmer-active');
-      setTimeout(() => parrotEl!.classList.remove('shimmer-active'), 1800);
-      scheduleShimmer();
-    }, next);
+  let intervalId: ReturnType<typeof setInterval> | null = null;
+  let stopSpawnTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function activeParticleCount() {
+    return particlesContainer?.childElementCount ?? 0;
   }
-  scheduleShimmer();
+
+  function createParticle() {
+    if (!particlesContainer) return;
+    if (activeParticleCount() >= MAX_PARTICLES) return;
+
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+
+    // Randomize starting position and animation duration
+    const leftPos = 20 + Math.random() * 60; // 20% to 80% left
+    const duration = 3 + Math.random() * 3; // 3 to 6 seconds
+    const delay = Math.random() * 2;
+    
+    particle.style.left = `${leftPos}%`;
+    particle.style.bottom = `${10 + Math.random() * 20}%`;
+    particle.style.animationDuration = `${duration}s`;
+    particle.style.animationDelay = `${delay}s`;
+
+    particlesContainer.appendChild(particle);
+
+    // Remove particle after animation ends to clean up DOM
+    setTimeout(() => {
+      particle.remove();
+    }, (duration + delay) * 1000);
+  }
+
+  function stopSpawn() {
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+    if (stopSpawnTimer) {
+      clearTimeout(stopSpawnTimer);
+      stopSpawnTimer = null;
+    }
+  }
+
+  function startSpawn() {
+    if (intervalId || document.hidden) return;
+    intervalId = setInterval(createParticle, SPAWN_INTERVAL_MS);
+    stopSpawnTimer = setTimeout(() => {
+      stopSpawn();
+    }, SPAWN_WINDOW_MS);
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      stopSpawn();
+      return;
+    }
+
+    if (activeParticleCount() < 2) {
+      startSpawn();
+    }
+  });
+
+  // Initial burst of particles
+  for (let i = 0; i < MAX_PARTICLES; i++) {
+    createParticle();
+  }
+
+  startSpawn();
 }

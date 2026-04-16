@@ -2,8 +2,19 @@ import { isValidUrl, evaluateSlugState } from './validation';
 import { showToast } from './toast';
 import { apiPost, apiDelete } from './api';
 import { recordUrlHistory, removeUrlHistoryByContext } from './history';
+import { confirmDialog } from './confirmDialog';
 
 export function initUrlBuilder() {
+  function debounce<T extends (...args: any[]) => void>(fn: T, delayMs = 160) {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    return (...args: Parameters<T>) => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(() => fn(...args), delayMs);
+    };
+  }
+
   const previewBase = ((import.meta.env.VITE_APP_DOMAIN as string | undefined)?.trim() || window.location.origin).replace(/\/+$/, '');
 
   const destInput = document.getElementById('url-dest-input') as HTMLInputElement | null;
@@ -110,8 +121,7 @@ export function initUrlBuilder() {
     }
   }
 
-  // Handle Destination URL live changes
-  destInput.addEventListener('input', () => {
+  const handleDestinationInput = () => {
     const val = destInput.value.trim();
     if (!val) {
       // Reset
@@ -125,30 +135,29 @@ export function initUrlBuilder() {
     if (isValidUrl(val)) {
       destInput.classList.remove('glow-error', 'shake');
       destInput.classList.add('glow-success');
-      
-      destMsg!.textContent = val.startsWith('https') ? "Secure connection (HTTPS) detected" : "Valid domain detected";
+
+      destMsg!.textContent = val.startsWith('https') ? 'Secure connection (HTTPS) detected' : 'Valid domain detected';
       destMsg!.classList.replace('text-red-400', 'text-green-400');
       destMsg!.style.opacity = '1';
 
-      destIcon!.innerHTML = `<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+      destIcon!.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
       destIcon!.style.opacity = '1';
     } else {
       destInput.classList.remove('glow-success');
       destInput.classList.add('glow-error');
-      
-      destMsg!.textContent = "Invalid URL format. Must start with http:// or https://";
+
+      destMsg!.textContent = 'Invalid URL format. Must start with http:// or https://';
       destMsg!.classList.replace('text-green-400', 'text-red-400');
       destMsg!.style.opacity = '1';
 
-      destIcon!.innerHTML = `<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+      destIcon!.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
       destIcon!.style.opacity = '1';
     }
 
     updatePreview();
-  });
+  };
 
-  // Handle Slug Changes
-  slugInput.addEventListener('input', () => {
+  const handleSlugInput = () => {
     const state = evaluateSlugState(slugInput.value.trim());
 
     slugIndicator!.style.opacity = '1';
@@ -161,32 +170,41 @@ export function initUrlBuilder() {
         break;
       case 'available':
         slugIndicator!.textContent = 'Available';
-        slugIndicator!.className = `text-[10px] font-semibold px-2 py-0.5 rounded-full opacity-100 transition-opacity bg-green-500/20 text-green-300 border border-green-500/30`;
+        slugIndicator!.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full opacity-100 transition-opacity bg-green-500/20 text-green-300 border border-green-500/30';
         slugInput.classList.add('glow-success');
         break;
       case 'invalid':
         slugIndicator!.textContent = 'Invalid Format';
-        slugIndicator!.className = `text-[10px] font-semibold px-2 py-0.5 rounded-full opacity-100 transition-opacity bg-red-500/20 text-red-300 border border-red-500/30`;
+        slugIndicator!.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full opacity-100 transition-opacity bg-red-500/20 text-red-300 border border-red-500/30';
         slugInput.classList.add('glow-error');
-        slugMsg!.textContent = "Only lowercase letters, numbers, and hyphens allowed.";
+        slugMsg!.textContent = 'Only lowercase letters, numbers, and hyphens allowed.';
         slugMsg!.style.opacity = '1';
         break;
       case 'restricted':
         slugIndicator!.textContent = 'Restricted';
-        slugIndicator!.className = `text-[10px] font-semibold px-2 py-0.5 rounded-full opacity-100 transition-opacity bg-yellow-500/20 text-yellow-300 border border-yellow-500/30`;
+        slugIndicator!.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full opacity-100 transition-opacity bg-yellow-500/20 text-yellow-300 border border-yellow-500/30';
         slugInput.classList.add('glow-error');
-        slugMsg!.textContent = "This identifier is restricted to prevent misuse.";
+        slugMsg!.textContent = 'This identifier is restricted to prevent misuse.';
         slugMsg!.style.opacity = '1';
         break;
       case 'taken':
         slugIndicator!.textContent = 'Already Taken';
-        slugIndicator!.className = `text-[10px] font-semibold px-2 py-0.5 rounded-full opacity-100 transition-opacity bg-red-500/20 text-red-300 border border-red-500/30`;
+        slugIndicator!.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full opacity-100 transition-opacity bg-red-500/20 text-red-300 border border-red-500/30';
         slugInput.classList.add('glow-error');
         break;
     }
 
     updatePreview();
-  });
+  };
+
+  const debouncedDestinationInput = debounce(handleDestinationInput);
+  const debouncedSlugInput = debounce(handleSlugInput);
+
+  // Handle Destination URL live changes
+  destInput.addEventListener('input', debouncedDestinationInput);
+
+  // Handle Slug Changes
+  slugInput.addEventListener('input', debouncedSlugInput);
 
   // Form Submission
   btnShorten.addEventListener('click', async () => {
@@ -295,7 +313,13 @@ export function initUrlBuilder() {
         return;
       }
 
-      const shouldDelete = window.confirm('Execute vanish protocol now? This compacted URL will be permanently erased.');
+      const shouldDelete = await confirmDialog({
+        title: 'Execute Vanish Protocol?',
+        message: 'This compacted URL will be permanently erased and cannot be recovered.',
+        confirmLabel: 'Erase Link',
+        cancelLabel: 'Cancel',
+        confirmVariant: 'danger',
+      });
       if (!shouldDelete) {
         return;
       }
@@ -315,10 +339,6 @@ export function initUrlBuilder() {
             latestUrlDeletionContext = null;
             showUrlForm(true);
             showToast('Link was already removed. History has been cleaned up.', 'success');
-
-            setTimeout(() => {
-              window.location.reload();
-            }, 1200);
             return;
           }
 
@@ -336,10 +356,6 @@ export function initUrlBuilder() {
         latestUrlDeletionContext = null;
         showUrlForm(true);
         showToast('Vanish protocol complete. Link erased from the vault.', 'success');
-
-        setTimeout(() => {
-          window.location.reload();
-        }, 1200);
       } catch {
         showToast('Network error while executing vanish protocol.', 'error');
         btnUrlVanishNow.disabled = false;

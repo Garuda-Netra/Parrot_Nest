@@ -2,6 +2,13 @@ const Url = require('../models/Url');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const QRCode = require('qrcode');
+const {
+  generateDeleteToken,
+  hashDeleteToken,
+  isValidDeleteToken,
+  getDeleteTokenFromRequest,
+  isDeleteTokenMatch,
+} = require('../utils/tokenUtils');
 
 function ensureDatabaseReady(res) {
   if (mongoose.connection.readyState === 1) {
@@ -14,47 +21,6 @@ function ensureDatabaseReady(res) {
     data: {},
   });
   return false;
-}
-
-function generateDeleteToken() {
-  return crypto.randomBytes(24).toString('hex');
-}
-
-function hashDeleteToken(token) {
-  return crypto.createHash('sha256').update(token).digest('hex');
-}
-
-function isValidDeleteToken(token) {
-  return typeof token === 'string' && token.trim().length > 0;
-}
-
-function getDeleteTokenFromRequest(req) {
-  const headerToken = req.headers['x-delete-token'];
-  if (typeof headerToken === 'string' && headerToken.trim()) {
-    return headerToken.trim();
-  }
-
-  if (req.body && typeof req.body.deleteToken === 'string' && req.body.deleteToken.trim()) {
-    return req.body.deleteToken.trim();
-  }
-
-  return '';
-}
-
-function isDeleteTokenMatch(plainToken, storedHash) {
-  if (!plainToken || !storedHash) {
-    return false;
-  }
-
-  const calculated = hashDeleteToken(plainToken);
-  const calculatedBuffer = Buffer.from(calculated, 'utf8');
-  const storedBuffer = Buffer.from(storedHash, 'utf8');
-
-  if (calculatedBuffer.length !== storedBuffer.length) {
-    return false;
-  }
-
-  return crypto.timingSafeEqual(calculatedBuffer, storedBuffer);
 }
 
 const RESTRICTED_SLUGS = [
@@ -76,10 +42,51 @@ function isValidHttpUrl(str) {
 }
 
 /**
- * Validate slug characters (lowercase, digits, hyphen only).
+ * Validate custom slug characters (lowercase, digits, hyphen only).
  */
-function isValidSlug(slug) {
+function isValidCustomSlug(slug) {
   return /^[a-z0-9-]+$/.test(slug);
+}
+
+/**
+ * Validate persisted short IDs for redirect/delete (supports generated base64url IDs).
+ */
+function isValidShortId(shortId) {
+  return /^[A-Za-z0-9_-]{1,64}$/.test(shortId);
+}
+
+function sanitizeBaseUrl(baseUrl) {
+  return baseUrl.replace(/\/+$/, '');
+}
+
+function resolvePublicShortBaseUrl() {
+  const candidates = [
+    process.env.PUBLIC_LINK_BASE_URL,
+    process.env.BASE_URL,
+    'http://localhost:5000',
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate !== 'string') {
+      continue;
+    }
+
+    const trimmed = candidate.trim();
+    if (!trimmed) {
+      continue;
+    }
+
+    try {
+      const parsed = new URL(trimmed);
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        return sanitizeBaseUrl(trimmed);
+      }
+    } catch {
+      // Ignore malformed candidates and try the next option.
+    }
+  }
+
+  return 'http://localhost:5000';
 }
 
 /**
@@ -162,7 +169,7 @@ exports.shortenUrl = async (req, res, next) => {
     if (customSlug) {
       customSlug = customSlug.trim().toLowerCase();
 
-      if (!isValidSlug(customSlug)) {
+      if (!isValidCustomSlug(customSlug)) {
         return res.status(400).json({
           success: false,
           message: 'Slug may only contain lowercase letters, numbers, and hyphens.',
@@ -232,8 +239,7 @@ exports.shortenUrl = async (req, res, next) => {
       expiresAt,
     });
 
-    const baseUrl = process.env.BASE_URL || 'http://localhost:5000';
-    const shortUrl = `${baseUrl}/${url.shortId}`;
+    const shortUrl = `${resolvePublicShortBaseUrl()}/${url.shortId}`;
     let qrCodeDataUri = '';
 
     try {
@@ -273,6 +279,14 @@ exports.shortenUrl = async (req, res, next) => {
 exports.redirectUrl = async (req, res, next) => {
   try {
     const { shortId } = req.params;
+
+    if (!shortId || !isValidShortId(shortId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid short ID format.',
+        data: {},
+      });
+    }
 
     if (!ensureDatabaseReady(res)) {
       return;
@@ -318,7 +332,7 @@ exports.deleteUrl = async (req, res, next) => {
   try {
     const { shortId } = req.params;
 
-    if (!shortId || !isValidSlug(shortId)) {
+    if (!shortId || !isValidShortId(shortId)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid short ID format.',

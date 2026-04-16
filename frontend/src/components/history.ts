@@ -1,5 +1,7 @@
-import { apiDelete } from './api';
+import { apiDelete, apiPost } from './api';
 import { showToast } from './toast';
+import { confirmDialog } from './confirmDialog';
+import { escapeHtml } from '../utils/escapeHtml';
 
 type HistoryItemType = 'clip' | 'url';
 
@@ -89,17 +91,6 @@ function formatDate(value: string): string {
   return date.toLocaleString();
 }
 
-function escapeHtml(value: string): string {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-  };
-  return value.replace(/[&<>"']/g, (ch) => map[ch] || ch);
-}
-
 function getClipSubtitle(item: ClipHistoryItem) {
   if (item.mode === 'snippet') {
     const snippet = item.contentPreview || 'Text clip';
@@ -116,13 +107,21 @@ function getClipSubtitle(item: ClipHistoryItem) {
 function renderHistoryItems(listEl: HTMLElement, emptyEl: HTMLElement) {
   const items = readHistory().sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
 
+  const purgeBtn = document.getElementById('btn-purge-all-history') as HTMLButtonElement | null;
+
   if (items.length === 0) {
     listEl.innerHTML = '';
     emptyEl.classList.remove('hidden');
+    if (purgeBtn) purgeBtn.classList.add('hidden');
     return;
   }
 
   emptyEl.classList.add('hidden');
+  if (purgeBtn) {
+    purgeBtn.classList.remove('hidden');
+    purgeBtn.classList.add('flex');
+  }
+
   listEl.innerHTML = items
     .map((item, index) => {
       if (item.type === 'clip') {
@@ -135,7 +134,7 @@ function renderHistoryItems(listEl: HTMLElement, emptyEl: HTMLElement) {
               <p class="text-[11px] text-gray-500 mt-2">Created: ${escapeHtml(formatDate(item.createdAt))}</p>
               <p class="text-[11px] text-gray-500">Expires: ${escapeHtml(formatDate(item.expiresAt))}</p>
             </div>
-            <button data-history-index="${index}" class="history-delete-btn text-red-400 hover:text-red-300 border border-red-500/30 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors">Delete</button>
+            <button data-history-index="${index}" class="history-delete-btn flex-shrink-0 whitespace-nowrap text-red-400 hover:text-red-300 border border-red-500/30 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors">Delete</button>
           </div>
         `;
       }
@@ -149,7 +148,7 @@ function renderHistoryItems(listEl: HTMLElement, emptyEl: HTMLElement) {
             <p class="text-[11px] text-gray-500">Created: ${escapeHtml(formatDate(item.createdAt))}</p>
             ${item.expiresAt ? `<p class="text-[11px] text-gray-500">Self-destruct: ${escapeHtml(formatDate(item.expiresAt))}</p>` : ''}
           </div>
-          <button data-history-index="${index}" class="history-delete-btn text-red-400 hover:text-red-300 border border-red-500/30 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors">Delete</button>
+          <button data-history-index="${index}" class="history-delete-btn flex-shrink-0 whitespace-nowrap text-red-400 hover:text-red-300 border border-red-500/30 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors">Delete</button>
         </div>
       `;
     })
@@ -165,7 +164,14 @@ function renderHistoryItems(listEl: HTMLElement, emptyEl: HTMLElement) {
       }
 
       const label = item.type === 'clip' ? `clip ${item.code}` : `short URL ${item.shortId}`;
-      if (!window.confirm(`Delete ${label}? This cannot be undone.`)) {
+      const shouldDelete = await confirmDialog({
+        title: 'Delete Secret Entry?',
+        message: `Delete ${label}? This action cannot be undone.`,
+        confirmLabel: 'Delete',
+        cancelLabel: 'Cancel',
+        confirmVariant: 'danger',
+      });
+      if (!shouldDelete) {
         return;
       }
 
@@ -182,10 +188,6 @@ function renderHistoryItems(listEl: HTMLElement, emptyEl: HTMLElement) {
             removeHistoryItem(item);
             renderHistoryItems(listEl, emptyEl);
             showToast('Entry was already removed. History cleaned up.', 'success');
-
-            setTimeout(() => {
-              window.location.reload();
-            }, 1200);
             return;
           }
 
@@ -198,11 +200,6 @@ function renderHistoryItems(listEl: HTMLElement, emptyEl: HTMLElement) {
         removeHistoryItem(item);
         renderHistoryItems(listEl, emptyEl);
         showToast('Deleted successfully.', 'success');
-
-        // Auto-refresh page after successful deletion
-        setTimeout(() => {
-          window.location.reload();
-        }, 1200);
       } catch {
         showToast('Network error while deleting entry.', 'error');
         button.disabled = false;
@@ -310,6 +307,7 @@ export function initHistory() {
   const closeBtn = document.getElementById('btn-close-history') as HTMLButtonElement | null;
   const listEl = document.getElementById('history-list') as HTMLDivElement | null;
   const emptyEl = document.getElementById('history-empty') as HTMLParagraphElement | null;
+  const purgeBtn = document.getElementById('btn-purge-all-history') as HTMLButtonElement | null;
 
   if (!openBtn || !modal || !closeBtn || !listEl || !emptyEl) {
     return;
@@ -326,6 +324,66 @@ export function initHistory() {
 
   openBtn.addEventListener('click', openModal);
   closeBtn.addEventListener('click', closeModal);
+
+  // ── Purge All Records ──────────────────────────────────────
+  if (purgeBtn) {
+    purgeBtn.addEventListener('click', async () => {
+      const items = readHistory();
+      if (items.length === 0) {
+        showToast('No records to purge.', 'error');
+        return;
+      }
+
+      const shouldPurge = await confirmDialog({
+        title: 'Purge All Records?',
+        message: `This will permanently erase ${items.length} record${items.length === 1 ? '' : 's'} from the vault and the backend database. This action cannot be undone.`,
+        confirmLabel: 'Purge Everything',
+        cancelLabel: 'Keep Records',
+        confirmVariant: 'danger',
+      });
+      if (!shouldPurge) {
+        return;
+      }
+
+      purgeBtn.disabled = true;
+      purgeBtn.classList.add('opacity-60', 'pointer-events-none');
+
+      // Build bulk payload
+      const bulkItems = items.map((item) => {
+        if (item.type === 'clip') {
+          return { type: 'clip', identifier: item.code, deleteToken: item.deleteToken };
+        }
+        return { type: 'url', identifier: item.shortId, deleteToken: item.deleteToken };
+      });
+
+      try {
+        const response = await apiPost('/api/clip/bulk-delete', { items: bulkItems });
+
+        // Clear all local history regardless of partial failures
+        writeHistory([]);
+        renderHistoryItems(listEl, emptyEl);
+
+        if (response.success) {
+          const { successCount, failCount } = response.data as { successCount: number; failCount: number };
+          if (failCount > 0) {
+            showToast(`Purge complete: ${successCount} erased, ${failCount} could not be removed from server.`, 'success');
+          } else {
+            showToast(`All ${successCount} records have been permanently erased.`, 'success');
+          }
+        } else {
+          showToast(response.message || 'Purge completed with errors.', 'error');
+        }
+      } catch {
+        // Even on network failure, clear local history
+        writeHistory([]);
+        renderHistoryItems(listEl, emptyEl);
+        showToast('Local records cleared. Some server records may persist due to a network error.', 'error');
+      } finally {
+        purgeBtn.disabled = false;
+        purgeBtn.classList.remove('opacity-60', 'pointer-events-none');
+      }
+    });
+  }
 
   modal.addEventListener('click', (event) => {
     if (event.target === modal) {

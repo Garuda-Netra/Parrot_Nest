@@ -1,8 +1,19 @@
 import { apiPost, apiGet, apiDelete, buildApiUrl } from './api';
 import { showToast } from './toast';
 import { recordClipHistory, removeClipHistoryByCode } from './history';
+import { confirmDialog } from './confirmDialog';
 
 export function initTabs() {
+  function debounce<T extends (...args: any[]) => void>(fn: T, delayMs = 140) {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    return (...args: Parameters<T>) => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(() => fn(...args), delayMs);
+    };
+  }
+
   // --- 1. Share/Retrieve Tabs Logic ---
   const tabShare = document.getElementById('tab-share') as HTMLButtonElement | null;
   const tabRetrieve = document.getElementById('tab-retrieve') as HTMLButtonElement | null;
@@ -82,9 +93,11 @@ export function initTabs() {
   const charCounter = document.getElementById('char-counter') as HTMLSpanElement | null;
 
   if (snippetTextarea && charCounter) {
-    snippetTextarea.addEventListener('input', () => {
+    const updateCharCount = debounce(() => {
       charCounter.textContent = snippetTextarea.value.length.toString();
     });
+
+    snippetTextarea.addEventListener('input', updateCharCount);
   }
 
   // --- 4. OTP Input Logic ---
@@ -134,10 +147,19 @@ export function initTabs() {
   const fileInput = document.getElementById('file-input') as HTMLInputElement | null;
   const dtModeFolder = document.getElementById('mode-folder') as HTMLDivElement | null;
   const folderInput = document.getElementById('folder-input') as HTMLInputElement | null;
+    let fileQueueRenderFrame = 0;
 
   function updateFileQueue() {
+      if (fileQueueRenderFrame) {
+        cancelAnimationFrame(fileQueueRenderFrame);
+      }
+
+      fileQueueRenderFrame = requestAnimationFrame(() => {
       const queueContainer = document.getElementById('file-list-queue');
-      if (!queueContainer) return;
+        if (!queueContainer) {
+          fileQueueRenderFrame = 0;
+          return;
+        }
 
       if (selectedFiles.length === 0) {
           queueContainer.classList.add('hidden');
@@ -149,6 +171,8 @@ export function initTabs() {
       queueContainer.classList.remove('hidden');
       queueContainer.classList.add('flex');
       queueContainer.innerHTML = '';
+
+      const fragment = document.createDocumentFragment();
 
       let totalSize = 0;
       const MAX_TOTAL_SIZE = 10 * 1024 * 1024;
@@ -177,7 +201,7 @@ export function initTabs() {
 
           outer.appendChild(info);
           outer.appendChild(delBtn);
-          queueContainer.appendChild(outer);
+           fragment.appendChild(outer);
       });
       
       // Add total size indicator
@@ -188,7 +212,11 @@ export function initTabs() {
       
       totalSizeDiv.className = `text-xs mt-2 px-2 py-1 rounded ${isAtLimit ? 'bg-red-500/20 text-red-300 border border-red-500/50' : isNearLimit ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/50' : 'bg-white/5 text-gray-300 border border-white/10'}`;
       totalSizeDiv.textContent = `Total: ${totalMB}MB / 10.00MB${isAtLimit ? ' ⚠️ LIMIT EXCEEDED' : ''}`;
-      queueContainer.appendChild(totalSizeDiv);
+      fragment.appendChild(totalSizeDiv);
+
+      queueContainer.appendChild(fragment);
+      fileQueueRenderFrame = 0;
+    });
   }
 
   function handleFilesInput(files: FileList | null) {
@@ -263,6 +291,19 @@ export function initTabs() {
   const btnClipVanishNow = document.getElementById('btn-clip-vanish-now') as HTMLButtonElement | null;
   let latestClipDeletionContext: { code: string; deleteToken: string } | null = null;
 
+  function resetLatestClipResult() {
+    latestClipDeletionContext = null;
+    clipResult?.classList.add('hidden');
+    if (clipResultCode) {
+      clipResultCode.textContent = '';
+    }
+
+    if (btnClipVanishNow) {
+      btnClipVanishNow.disabled = false;
+      btnClipVanishNow.classList.remove('opacity-60', 'pointer-events-none');
+    }
+  }
+
   if (btnGenerate && btnGenerateText) {
     btnGenerate.addEventListener('click', async () => {
       const formData = new FormData();
@@ -333,6 +374,11 @@ export function initTabs() {
             deleteToken: res.data.deleteToken,
           };
 
+          if (btnClipVanishNow) {
+            btnClipVanishNow.disabled = false;
+            btnClipVanishNow.classList.remove('opacity-60', 'pointer-events-none');
+          }
+
           recordClipHistory({
             code: res.data.code,
             deleteToken: res.data.deleteToken,
@@ -362,7 +408,13 @@ export function initTabs() {
         return;
       }
 
-      const shouldDelete = window.confirm('Execute vanish protocol now? This clip will be permanently erased from the vault.');
+      const shouldDelete = await confirmDialog({
+        title: 'Execute Vanish Protocol?',
+        message: 'This clip will be permanently erased from the vault and cannot be recovered.',
+        confirmLabel: 'Erase Clip',
+        cancelLabel: 'Cancel',
+        confirmVariant: 'danger',
+      });
       if (!shouldDelete) {
         return;
       }
@@ -373,6 +425,13 @@ export function initTabs() {
       try {
         const response = await apiDelete(`/api/clip/${latestClipDeletionContext.code}`, latestClipDeletionContext.deleteToken);
         if (!response.success) {
+          if (/not found|already deleted|expired/i.test(response.message || '')) {
+            removeClipHistoryByCode(latestClipDeletionContext.code);
+            resetLatestClipResult();
+            showToast('Clip was already removed. History has been cleaned up.', 'success');
+            return;
+          }
+
           showToast(response.message || 'Vanish protocol failed.', 'error');
           btnClipVanishNow.disabled = false;
           btnClipVanishNow.classList.remove('opacity-60', 'pointer-events-none');
@@ -380,13 +439,8 @@ export function initTabs() {
         }
 
         removeClipHistoryByCode(latestClipDeletionContext.code);
-        latestClipDeletionContext = null;
-        clipResult?.classList.add('hidden');
+        resetLatestClipResult();
         showToast('Vanish protocol complete. Clip erased from the vault.', 'success');
-
-        setTimeout(() => {
-          window.location.reload();
-        }, 1200);
       } catch {
         showToast('Network error while executing vanish protocol.', 'error');
         btnClipVanishNow.disabled = false;

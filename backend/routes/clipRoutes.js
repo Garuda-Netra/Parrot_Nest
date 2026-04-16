@@ -79,6 +79,12 @@ router.post('/create', (req, res, next) => {
 router.get('/download/:fileName', clipController.downloadClipFile);
 
 /**
+ * POST /api/clip/bulk-delete
+ * Bulk-deletes multiple clips and/or URLs
+ */
+router.post('/bulk-delete', clipController.bulkDeleteItems);
+
+/**
  * GET /api/clip/:code
  * Retrieves a clip by its 4-digit code
  */

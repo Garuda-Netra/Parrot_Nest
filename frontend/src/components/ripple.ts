@@ -1,5 +1,10 @@
 export function initRipple() {
-  document.addEventListener('click', (e: Event) => {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReducedMotion) {
+    return;
+  }
+
+  document.addEventListener('pointerdown', (e: Event) => {
     const target = e.target as HTMLElement;
     const btn = target.closest('.glass-btn, .glass-btn-primary') as HTMLElement;
     
@@ -22,5 +27,5 @@ export function initRipple() {
         ripple.remove();
       }, 600);
     }
-  });
+  }, { passive: true });
 }

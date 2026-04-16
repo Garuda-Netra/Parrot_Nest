@@ -3,6 +3,10 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/:shortId([A-Za-z0-9_-]{1,64})",
+      "destination": "/api/redirect/:shortId"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

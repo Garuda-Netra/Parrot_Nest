@@ -9,7 +9,9 @@
   "scripts": {
     "build": "echo Backend build step not required",
     "start": "node server.js",
-    "dev": "nodemon server.js"  
+    "dev": "nodemon server.js",
+    "cleanup:dry": "node scripts/cleanupAllData.js --dry-run",
+    "cleanup:confirm": "node scripts/cleanupAllData.js --confirm"
   },
   "keywords": [],
   "author": "Prince",

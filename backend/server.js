@@ -41,6 +41,57 @@ function validateRequiredEnv() {
   }
 }
 
+function looksPlaceholderValue(value) {
+  if (typeof value !== 'string') {
+    return false;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+
+  return [
+    'your-backend-name.onrender.com',
+    'your-frontend-name.vercel.app',
+    'example.com',
+    'replace-me',
+    'changeme',
+  ].some((needle) => normalized.includes(needle));
+}
+
+function warnPlaceholderLikeEnvValues() {
+  const checks = [
+    {
+      key: 'BASE_URL',
+      values: [process.env.BASE_URL],
+    },
+    {
+      key: 'PUBLIC_LINK_BASE_URL',
+      values: [process.env.PUBLIC_LINK_BASE_URL],
+    },
+    {
+      key: 'CORS_ORIGINS',
+      values: (process.env.CORS_ORIGINS || '')
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean),
+    },
+  ];
+
+  for (const check of checks) {
+    for (const value of check.values) {
+      if (!looksPlaceholderValue(value)) {
+        continue;
+      }
+
+      console.warn(
+        `[config warning] ${check.key} appears to use a placeholder value: ${value}. Update deployment environment values before production use.`,
+      );
+    }
+  }
+}
+
 const app = express();
 
 // ── Global Middleware ───────────────────────────────────────
@@ -93,6 +144,7 @@ const PORT = process.env.PORT || 5000;
 
 async function startServer() {
   try {
+    warnPlaceholderLikeEnvValues();
     validateRequiredEnv();
     await connectDB();
     app.listen(PORT, () => {

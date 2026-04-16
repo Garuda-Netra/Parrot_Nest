@@ -2,8 +2,14 @@
 const Clip = require('../models/Clip');
 const path = require('path');
 const mongoose = require('mongoose');
-const crypto = require('crypto');
 const fs = require('fs/promises');
+const {
+  generateDeleteToken,
+  hashDeleteToken,
+  isValidDeleteToken,
+  getDeleteTokenFromRequest,
+  isDeleteTokenMatch,
+} = require('../utils/tokenUtils');
 
 function ensureDatabaseReady(res) {
   if (mongoose.connection.readyState === 1) {
@@ -16,47 +22,6 @@ function ensureDatabaseReady(res) {
     data: {},
   });
   return false;
-}
-
-function generateDeleteToken() {
-  return crypto.randomBytes(24).toString('hex');
-}
-
-function hashDeleteToken(token) {
-  return crypto.createHash('sha256').update(token).digest('hex');
-}
-
-function isValidDeleteToken(token) {
-  return typeof token === 'string' && token.trim().length > 0;
-}
-
-function getDeleteTokenFromRequest(req) {
-  const headerToken = req.headers['x-delete-token'];
-  if (typeof headerToken === 'string' && headerToken.trim()) {
-    return headerToken.trim();
-  }
-
-  if (req.body && typeof req.body.deleteToken === 'string' && req.body.deleteToken.trim()) {
-    return req.body.deleteToken.trim();
-  }
-
-  return '';
-}
-
-function isDeleteTokenMatch(plainToken, storedHash) {
-  if (!plainToken || !storedHash) {
-    return false;
-  }
-
-  const calculated = hashDeleteToken(plainToken);
-  const calculatedBuffer = Buffer.from(calculated, 'utf8');
-  const storedBuffer = Buffer.from(storedHash, 'utf8');
-
-  if (calculatedBuffer.length !== storedBuffer.length) {
-    return false;
-  }
-
-  return crypto.timingSafeEqual(calculatedBuffer, storedBuffer);
 }
 
 function getStoredFileNameFromUrl(fileUrl) {
@@ -454,6 +419,105 @@ exports.deleteClip = async (req, res, next) => {
       success: true,
       message: 'Clip deleted successfully.',
       data: {},
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * POST /api/clip/bulk-delete
+ *
+ * Accepts JSON body:
+ *   { items: [{ type: 'clip'|'url', identifier: string, deleteToken: string }] }
+ *
+ * Deletes each item from the database. Returns per-item results.
+ */
+exports.bulkDeleteItems = async (req, res, next) => {
+  try {
+    const { items } = req.body;
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Request body must contain a non-empty "items" array.',
+        data: {},
+      });
+    }
+
+    if (items.length > 100) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete more than 100 items at once.',
+        data: {},
+      });
+    }
+
+    if (!ensureDatabaseReady(res)) {
+      return;
+    }
+
+    const Url = require('../models/Url');
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const item of items) {
+      try {
+        const { type, identifier, deleteToken } = item;
+
+        if (!identifier || !deleteToken) {
+          failCount++;
+          continue;
+        }
+
+        if (type === 'clip') {
+          if (!/^\d{4}$/.test(identifier)) {
+            failCount++;
+            continue;
+          }
+
+          const clip = await Clip.findOne({ code: identifier });
+          if (!clip) {
+            // Already deleted — count as success for cleanup purposes
+            successCount++;
+            continue;
+          }
+
+          if (!isDeleteTokenMatch(deleteToken, clip.deleteTokenHash)) {
+            failCount++;
+            continue;
+          }
+
+          const filesToDelete = Array.isArray(clip.files) ? [...clip.files] : [];
+          await clip.deleteOne();
+          await cleanupClipFiles(filesToDelete);
+          successCount++;
+        } else if (type === 'url') {
+          const url = await Url.findOne({ shortId: identifier });
+          if (!url) {
+            successCount++;
+            continue;
+          }
+
+          if (!isDeleteTokenMatch(deleteToken, url.deleteTokenHash)) {
+            failCount++;
+            continue;
+          }
+
+          await url.deleteOne();
+          successCount++;
+        } else {
+          failCount++;
+        }
+      } catch {
+        failCount++;
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Purge complete. ${successCount} record${successCount === 1 ? '' : 's'} erased, ${failCount} failed.`,
+      data: { successCount, failCount },
     });
   } catch (err) {
     next(err);
