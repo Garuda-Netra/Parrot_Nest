@@ -1,0 +1,403 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans antialiased text-parchment-light min-h-screen selection:bg-gold-muted/30 selection:text-gold-glow;
+    background: linear-gradient(rgba(10, 10, 10, 0.75), rgba(18, 18, 18, 0.85)), url('/parchment-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-blend-mode: overlay;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    @apply bg-darkUI-glass backdrop-blur-2xl border border-white/10 shadow-2xl rounded-[30px];
+  }
+  
+  .glass-input {
+    @apply bg-white/5 border border-white/10 focus:border-gold-muted focus:ring-1 focus:ring-gold-muted focus:bg-white/10 outline-none transition-all duration-300 placeholder-white/30 text-parchment;
+  }
+
+  .glass-btn {
+    @apply relative overflow-hidden bg-white/5 border border-white/10 hover:border-gold-muted/50 text-parchment hover:text-gold-glow hover:bg-gold-muted/10 transition-all duration-300 shadow-[0_0_15px_rgba(207,174,123,0.0)] hover:shadow-[0_0_25px_rgba(207,174,123,0.15)];
+  }
+
+  .glass-btn-primary {
+    @apply relative overflow-hidden bg-gold-muted/20 border border-gold-muted/40 text-gold-glow hover:bg-gold-muted/30 transition-all duration-300 shadow-[0_0_15px_rgba(207,174,123,0.1)] hover:shadow-[0_0_30px_rgba(207,174,123,0.3)];
+  }
+
+  .pill-btn {
+    @apply px-4 py-1.5 rounded-full text-sm font-medium border border-transparent cursor-pointer transition-all duration-300 hover:text-white bg-white/5 text-gray-400;
+  }
+
+  .pill-btn.active {
+    @apply border-red-500/50 bg-red-500/10 text-red-200 shadow-[0_0_15px_rgba(239,68,68,0.2)];
+  }
+
+  .url-liquid-btn {
+    @apply relative overflow-hidden px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-semibold border transition-all duration-300;
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(34, 211, 238, 0.08));
+    border-color: rgba(34, 211, 238, 0.35);
+    color: rgb(165, 243, 252);
+    box-shadow: 
+      inset 0 1px 2px rgba(255, 255, 255, 0.1),
+      0 4px 12px rgba(6, 182, 212, 0.15),
+      0 0 20px rgba(6, 182, 212, 0.08);
+  }
+
+  .url-liquid-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    transition: left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none;
+  }
+
+  .url-liquid-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.08), transparent 70%);
+    pointer-events: none;
+  }
+
+  .url-liquid-btn:hover {
+    border-color: rgba(34, 211, 238, 0.6);
+    color: rgb(240, 253, 250);
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(34, 211, 238, 0.15));
+    box-shadow: 
+      inset 0 1px 3px rgba(255, 255, 255, 0.15),
+      0 6px 20px rgba(6, 182, 212, 0.25),
+      0 0 30px rgba(6, 182, 212, 0.15);
+    transform: translateY(-1px);
+  }
+
+  .url-liquid-btn:hover::before {
+    left: 100%;
+  }
+
+  .url-liquid-btn.active {
+    border-color: rgba(251, 146, 60, 0.7);
+    color: rgb(254, 243, 235);
+    background: linear-gradient(135deg, rgba(251, 146, 60, 0.28), rgba(249, 115, 22, 0.18));
+    box-shadow: 
+      inset 0 1px 3px rgba(255, 255, 255, 0.18),
+      0 0 24px rgba(251, 146, 60, 0.35),
+      0 4px 16px rgba(251, 146, 60, 0.25),
+      inset 0 0 20px rgba(251, 146, 60, 0.15);
+  }
+
+  .url-liquid-btn.active::before {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  }
+
+  .url-liquid-btn:active {
+    transform: translateY(0);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(226, 194, 136, 0.3);
+  }
+  
+  .glow-success {
+    @apply border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.2)] bg-green-500/5;
+  }
+  
+  .glow-error {
+    @apply border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)] bg-red-500/5;
+  }
+}
+
+/* Base structural fixes for elements */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  background-color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
+.dropzone-active {
+  @apply border-gold-muted bg-white/10 shadow-[0_0_20px_rgba(207,174,123,0.2)];
+}
+
+/* Toast container positioning */
+#toast-container {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.toast {
+  @apply bg-darkUI backdrop-blur-xl border shadow-2xl rounded-xl px-4 py-3 min-w-[250px] flex items-center gap-3 animate-slide-up pointer-events-auto;
+}
+
+.toast.success {
+  @apply border-green-500/30 text-green-400;
+}
+
+.toast.error {
+  @apply border-red-500/30 text-red-400;
+}
+
+/* Spinner */
+.spinner {
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  width: 1.25rem;
+  height: 1.25rem;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ═══════════════════════════════════════════════════
+   PARROT — Living Hero Animation System
+   ═══════════════════════════════════════════════════ */
+
+/* ── Container (floating) ────────────────────────── */
+.parrot-container {
+  animation: parrotFloat 4.5s ease-in-out infinite;
+  will-change: transform;
+  z-index: 2;
+}
+
+@keyframes parrotFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-14px); }
+}
+
+/* ── Ambient glow behind the parrot ──────────────── */
+.parrot-glow {
+  position: absolute;
+  inset: -20%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(207, 174, 123, 0.18) 0%,
+    rgba(226, 130, 50, 0.10) 35%,
+    rgba(180, 60, 30, 0.05) 60%,
+    transparent 80%
+  );
+  filter: blur(40px);
+  pointer-events: none;
+  animation: glowPulse 6s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.08); }
+}
+
+/* ── Body wrapper (micro-rotation / sway) ────────── */
+.parrot-body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 1;
+}
+
+/* ── The parrot image itself ─────────────────────── */
+.parrot-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 20px 30px rgba(0, 0, 0, 0.6))
+    drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+  user-select: none;
+  -webkit-user-drag: none;
+  /* Radial mask — reveals the parrot while seamlessly blending
+     the dark image background into the page */
+  -webkit-mask-image: radial-gradient(
+    ellipse 62% 70% at 46% 45%,
+    black 38%,
+    rgba(0,0,0,0.65) 52%,
+    rgba(0,0,0,0.2) 68%,
+    transparent 82%
+  );
+  mask-image: radial-gradient(
+    ellipse 62% 70% at 46% 45%,
+    black 38%,
+    rgba(0,0,0,0.65) 52%,
+    rgba(0,0,0,0.2) 68%,
+    transparent 82%
+  );
+}
+
+/* Edge glow to integrate with UI theme */
+.parrot-container::after {
+  content: '';
+  position: absolute;
+  inset: 5%;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow:
+    0 0 60px 8px rgba(207, 174, 123, 0.06),
+    0 0 120px 20px rgba(226, 130, 50, 0.03);
+  pointer-events: none;
+  z-index: 3;
+  animation: edgeGlow 5s ease-in-out infinite alternate;
+}
+
+@keyframes edgeGlow {
+  0%   { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+/* ── Eye blink overlay ──────────────────────────── */
+.parrot-eye-overlay {
+  position: absolute;
+  /* Position over the eye area — tuned for a typical macaw portrait */
+  top: 18%;
+  left: 32%;
+  width: 20%;
+  height: 6%;
+  background: #1a1008;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+  transition: none;
+}
+
+.parrot-eye-overlay.blink {
+  animation: parrotBlink 180ms ease-in-out;
+}
+
+@keyframes parrotBlink {
+  0%   { opacity: 0; transform: scaleY(0.3); }
+  40%  { opacity: 0.85; transform: scaleY(1); }
+  60%  { opacity: 0.85; transform: scaleY(1); }
+  100% { opacity: 0; transform: scaleY(0.3); }
+}
+
+/* ── Shimmer / feather highlight ─────────────────── */
+.parrot-shimmer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.06) 45%,
+    rgba(255, 225, 160, 0.08) 50%,
+    rgba(255, 255, 255, 0.06) 55%,
+    transparent 70%
+  );
+  background-size: 250% 100%;
+  background-position: 100% 0;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+  transition: opacity 0.3s ease;
+}
+
+.parrot-container.shimmer-active .parrot-shimmer {
+  opacity: 1;
+  animation: shimmerPass 1.6s ease-in-out;
+}
+
+@keyframes shimmerPass {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -50% 0; }
+}
+
+/* ── Ground shadow ───────────────────────────────── */
+.parrot-ground-shadow {
+  position: absolute;
+  bottom: -8%;
+  left: 15%;
+  width: 70%;
+  height: 12%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0.15) 50%,
+    transparent 80%
+  );
+  filter: blur(8px);
+  pointer-events: none;
+  z-index: 0;
+  animation: shadowPulse 4.5s ease-in-out infinite;
+}
+
+/* Shadow shrinks when parrot floats up */
+@keyframes shadowPulse {
+  0%, 100% { transform: scaleX(1)   scaleY(1);   opacity: 0.8; }
+  50%      { transform: scaleX(0.85) scaleY(0.7); opacity: 0.5; }
+}
+
+/* ── Hover interactivity ─────────────────────────── */
+.parrot-container:hover .parrot-img {
+  filter:
+    drop-shadow(0 25px 35px rgba(0, 0, 0, 0.7))
+    drop-shadow(0 5px 15px rgba(0, 0, 0, 0.5))
+    brightness(1.08);
+  transition: filter 0.6s ease;
+}
+
+.parrot-container:hover .parrot-glow {
+  opacity: 1;
+  transform: scale(1.15);
+  transition: all 0.8s ease;
+}
+
+/* ── Responsive adjustments ──────────────────────── */
+@media (max-width: 768px) {
+  .parrot-container {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  @keyframes parrotFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parrot-container,
+  .parrot-glow,
+  .parrot-ground-shadow,
+  .parrot-container::after {
+    animation: none !important;
+  }
+  .parrot-body {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/assets/parrot-falcon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ParrotClip | Secure • Fast • Private</title>
+  </head>
+  <body class="overflow-x-hidden flex flex-col min-h-screen">
+    <div id="app" class="flex-grow flex flex-col relative z-10 w-full max-w-[1440px] mx-auto px-6 py-6 md:px-12 lg:py-12">
+      
+      <!-- Top Section -->
+      <header class="flex justify-center mb-8 lg:mb-16 animate-slide-up">
+        <div class="relative glass-card !rounded-full p-1.5 flex items-center shadow-lg gap-2">
+          <!-- Toggle Background Sliding Pill -->
+          <div id="toggle-indicator" class="absolute left-1.5 top-1.5 bottom-1.5 w-[calc(50%-0.375rem)] bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)] rounded-full transition-all duration-300 ease-in-out"></div>
+          
+          <button id="toggle-parrotclip" class="relative z-10 px-6 py-2 rounded-full text-sm font-medium transition-colors duration-300 text-gold-glow">
+            ParrotClip
+          </button>
+          <button id="toggle-urlshortener" class="relative z-10 px-6 py-2 rounded-full text-sm font-medium transition-colors duration-300 text-gray-400 hover:text-white">
+            ParrotURL
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Layout -->
+      <main class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center flex-grow">
+        
+        <!-- Left Side: Hero -->
+        <section class="flex flex-col items-center lg:items-start text-center lg:text-left space-y-6 animate-slide-up" style="animation-delay: 0.1s;">
+          <!-- Animated Living Parrot -->
+          <div id="parrot-alive" class="parrot-container relative w-44 h-44 md:w-56 md:h-56 lg:w-64 lg:h-64 mb-4 lg:mb-0">
+            <!-- Ambient glow backdrop -->
+            <div class="parrot-glow"></div>
+            
+            <!-- Body wrapper (for micro-rotation / sway) -->
+            <div class="parrot-body">
+              <img 
+                src="/assets/parrot.png" 
+                alt="Scarlet Macaw — ParrotClip mascot" 
+                class="parrot-img"
+                draggable="false"
+              />
+              <!-- Shimmer highlight -->
+              <div class="parrot-shimmer"></div>
+            </div>
+
+            <!-- Ground shadow -->
+            <div class="parrot-ground-shadow"></div>
+          </div>
+          
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold tracking-wider text-gold-muted uppercase">
+            <span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span>
+            Secure • Fast • Private
+          </div>
+          
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-white">
+            Instantly share <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold-muted to-parchment-light">text & files</span> across devices
+          </h1>
+          
+          <p class="text-lg text-gray-300 max-w-md">
+            Generate a secure 4-digit code. Anyone with it can fetch your clip.
+          </p>
+          
+          <button id="btn-view-history" class="glass-btn-primary px-8 py-4 rounded-full font-semibold mt-4 sm:w-auto w-full group flex items-center justify-center lg:justify-start gap-2 hover:scale-105">
+            View Secret History
+            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </button>
+        </section>
+
+        <!-- Right Side: Main Card -->
+        <section class="animate-slide-up" style="animation-delay: 0.2s;">
+          <div class="glass-card p-6 md:p-8 relative overflow-hidden min-h-[500px] flex flex-col">
+            
+            <!-- ParrotClip Tool UI -->
+            <div id="parrotclip-ui" class="flex-grow flex flex-col transition-opacity duration-300 opacity-100">
+              <!-- Tabs -->
+              <div class="flex bg-black/40 rounded-full p-1 mb-6 border border-white/5 relative">
+                <div id="tab-indicator" class="absolute left-1 top-1 bottom-1 w-[calc(50%-0.25rem)] bg-white/10 rounded-full transition-all duration-300"></div>
+                <button id="tab-share" class="flex-1 relative z-10 py-2.5 text-sm font-semibold rounded-full text-gold-glow transition-colors duration-300">Share</button>
+                <button id="tab-retrieve" class="flex-1 relative z-10 py-2.5 text-sm font-semibold rounded-full text-gray-400 hover:text-white transition-colors duration-300">Retrieve</button>
+              </div>
+
+              <!-- Share Tab Content -->
+              <div id="content-share" class="flex-grow flex flex-col animate-fade-in block">
+                
+                <!-- Share Sub-Tabs -->
+                <div class="flex gap-4 mb-4 border-b border-white/10 pb-2">
+                  <button id="subtab-snippet" class="text-sm font-medium pb-2 text-gold-muted border-b-2 border-gold-muted transition-colors">Snippet</button>
+                  <button id="subtab-file" class="text-sm font-medium pb-2 text-gray-500 border-b-2 border-transparent hover:text-gray-300 transition-colors">Drop File</button>
+                  <button id="subtab-folder" class="text-sm font-medium pb-2 text-gray-500 border-b-2 border-transparent hover:text-gray-300 transition-colors">Folder</button>
+                </div>
+
+                <!-- Snippet Mode -->
+                <div id="mode-snippet" class="flex-grow flex flex-col relative mb-4 block">
+                  <textarea id="snippet-textarea" class="glass-input flex-grow w-full rounded-2xl p-4 resize-none h-[180px]" placeholder="Paste your secret text here…"></textarea>
+                  <div class="absolute bottom-4 right-4 text-xs text-gray-500 bg-background/80 px-2 py-1 rounded backdrop-blur">
+                    <span id="char-counter">0</span> / 5000
+                  </div>
+                </div>
+
+                <!-- File Mode -->
+                <div id="mode-file" class="flex-grow flex-col justify-center items-center relative mb-4 hidden border-2 border-dashed border-white/20 rounded-2xl p-8 transition-colors duration-300 hover:border-white/40 cursor-pointer">
+                  <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                  <p class="text-gray-300 font-medium text-center">Click to upload or drag & drop a file</p>
+                  <p class="text-xs text-gray-500 mt-2">Max file size: 10MB</p>
+                  <input id="file-input" type="file" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                </div>
+
+                <!-- Folder Mode -->
+                <div id="mode-folder" class="flex-grow flex-col justify-center items-center relative mb-4 hidden border-2 border-dashed border-white/20 rounded-2xl p-8 transition-colors duration-300 hover:border-white/40 cursor-pointer">
+                  <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                  <p class="text-gray-300 font-medium text-center">Click to upload or drag & drop a folder</p>
+                  <p class="text-xs text-gray-500 mt-2">Multiple files supported (Max total 10MB)</p>
+                  <input id="folder-input" type="file" webkitdirectory directory multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                </div>
+
+                <!-- Selected Files List Queue -->
+                <div id="file-list-queue" class="flex-col gap-2 mb-4 hidden max-h-[120px] overflow-y-auto pr-1"></div>
+
+                <!-- Self Destruct Options -->
+                <div class="mb-6">
+                  <label class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Self Destruct</label>
+                  <div id="clip-expiry-options" class="flex flex-wrap gap-2">
+                    <button type="button" class="url-liquid-btn active" data-expiry="5m">Rapid Lock • 5m</button>
+                    <button type="button" class="url-liquid-btn" data-expiry="1h">Secure Hour • 1h</button>
+                    <button type="button" class="url-liquid-btn" data-expiry="1d">Daily Vault • 1d</button>
+                    <button type="button" class="url-liquid-btn" data-expiry="2d">Extended Shield • 2d</button>
+                  </div>
+                </div>
+
+                <button id="btn-generate-clip" class="glass-btn-primary w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2">
+                  <span id="btn-generate-text">Generate Secure Link</span>
+                </button>
+
+                <!-- Clip Created Result -->
+                <div id="clip-result" class="hidden mt-4 glass-input bg-white/5 border border-white/10 rounded-xl p-4 text-center animate-fade-slide">
+                  <p class="text-xs text-gray-400 mb-1">Your secure passcode:</p>
+                  <p id="clip-result-code" class="text-4xl font-bold text-gold-glow tracking-[0.3em] mb-2"></p>
+                  <p class="text-[10px] text-gray-500">Share this code to let others retrieve your clip.</p>
+                  <button id="btn-clip-vanish-now" type="button" class="glass-btn w-full mt-3 py-2.5 rounded-xl text-sm font-semibold text-red-300 border-red-500/30 hover:text-red-200 hover:border-red-400/40">
+                    Execute Vanish Protocol
+                  </button>
+                </div>
+              </div>
+
+              <!-- Retrieve Tab Content -->
+              <div id="content-retrieve" class="flex-grow flex flex-col justify-center animate-fade-in hidden">
+                <div class="text-center mb-8">
+                  <h3 class="text-2xl font-bold text-white mb-2">Enter Passcode</h3>
+                  <p class="text-sm text-gray-400">Enter the 4-digit code to fetch the secure clip.</p>
+                </div>
+
+                <div class="flex justify-center gap-3 md:gap-4 mb-8">
+                  <input type="text" maxlength="1" class="otp-input w-14 h-16 md:w-16 md:h-18 text-center text-3xl font-bold glass-input rounded-xl" inputmode="numeric" />
+                  <input type="text" maxlength="1" class="otp-input w-14 h-16 md:w-16 md:h-18 text-center text-3xl font-bold glass-input rounded-xl" inputmode="numeric" />
+                  <input type="text" maxlength="1" class="otp-input w-14 h-16 md:w-16 md:h-18 text-center text-3xl font-bold glass-input rounded-xl" inputmode="numeric" />
+                  <input type="text" maxlength="1" class="otp-input w-14 h-16 md:w-16 md:h-18 text-center text-3xl font-bold glass-input rounded-xl" inputmode="numeric" />
+                </div>
+
+                <button id="btn-fetch-clip" class="glass-btn-primary w-full py-4 rounded-2xl font-bold text-lg mb-6 flex items-center justify-center gap-2">
+                  <span id="btn-fetch-text">Fetch Secure Clip</span>
+                </button>
+
+                <!-- Retrieved Clip Result -->
+                <div id="retrieve-result" class="hidden mb-4 glass-input bg-white/5 border border-green-500/20 rounded-xl p-4 animate-fade-slide">
+                  <p id="retrieve-result-text-label" class="text-xs text-gray-400 mb-2">Retrieved clip content:</p>
+                  <pre id="retrieve-result-content" class="text-sm text-parchment-light whitespace-pre-wrap break-words max-h-48 overflow-y-auto hidden"></pre>
+                  
+                  <!-- Container for Files -->
+                  <div id="retrieve-result-files" class="mt-4 flex flex-col gap-2 empty:hidden"></div>
+                  <button id="btn-download-all" class="hidden glass-btn-primary w-full py-2 mt-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Download All Files
+                  </button>
+                  <a id="retrieve-result-file" class="hidden" target="_blank"></a> <!-- Kept for backward compatibility -->
+                </div>
+
+                <div class="glass-input rounded-xl p-4 flex items-start gap-3 bg-white/5 border border-white/5">
+                  <svg class="w-5 h-5 text-gold-muted shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                  <p class="text-xs text-gray-400 leading-relaxed">
+                    Retrieval is encrypted locally. Clip remains active until expiry.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- URL Shortener Tool UI -->
+            <div id="urlshortener-ui" class="absolute inset-x-0 inset-y-0 p-6 md:p-8 flex-col hidden opacity-0 transition-opacity duration-300 overflow-y-auto">
+              
+              <!-- Form Section -->
+              <div id="url-form-section" class="flex flex-col flex-grow w-full max-w-lg mx-auto">
+                <div class="text-center mb-6">
+                  <h3 class="text-2xl font-bold text-white mb-1">Shorten & Secure</h3>
+                  <p class="text-xs text-gray-400">Create tiny, tracker-free links instantly.</p>
+                </div>
+                
+                <!-- 1. Destination URL Input -->
+                <div class="mb-4 relative">
+                  <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Destination URL</label>
+                  <div class="relative">
+                    <input id="url-dest-input" type="url" class="glass-input w-full rounded-xl p-3 pl-4 pr-10 text-sm" placeholder="Paste your long URL here (https://...)" />
+                    <div id="url-dest-icon" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 opacity-0 transition-opacity duration-200">
+                      <!-- Validation icon injected here -->
+                    </div>
+                  </div>
+                  <p id="url-dest-msg" class="text-[10px] sm:text-xs text-red-400 mt-1.5 h-4 opacity-0 transition-opacity">Invalid URL format</p>
+                </div>
+
+                <!-- 2. Custom Slug Builder -->
+                <div class="mb-4">
+                  <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider flex items-center justify-between">
+                    <span>Custom Slug</span>
+                    <span id="slug-indicator" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/5 opacity-0 transition-opacity"></span>
+                  </label>
+                  <div class="flex">
+                    <span class="inline-flex items-center px-3 text-sm text-gray-400 bg-white/5 border border-white/10 rounded-l-xl border-r-0 whitespace-nowrap">
+                      parrotclip.com/
+                    </span>
+                    <input id="url-slug-input" type="text" class="glass-input w-full border border-white/10 rounded-r-xl rounded-l-none p-3 text-sm" placeholder="custom-name (optional)" />
+                  </div>
+                  <p id="url-slug-msg" class="text-[10px] sm:text-xs text-red-400 mt-1.5 h-4 opacity-0 transition-opacity"></p>
+                </div>
+
+                <div class="mb-4">
+                  <label class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Self Destruct Mode</label>
+                  <div id="url-expiry-options" class="flex flex-wrap gap-2">
+                    <button type="button" class="url-liquid-btn active" data-url-expiry="5m">Quick Burn • 5m</button>
+                    <button type="button" class="url-liquid-btn" data-url-expiry="20m">Heatwave • 20m</button>
+                    <button type="button" class="url-liquid-btn" data-url-expiry="1h">Phantom Hour • 1h</button>
+                    <button type="button" class="url-liquid-btn" data-url-expiry="1d">Sunset Vault • 1d</button>
+                  </div>
+                </div>
+
+                <!-- 4. Preview Section -->
+                <div class="glass-input bg-white/5 border border-white/5 rounded-xl p-3 mb-6 hidden" id="preview-panel">
+                  <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-gold-muted mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div class="overflow-hidden">
+                      <p class="text-xs text-gray-300 font-medium whitespace-nowrap truncate" id="preview-short-url">parrotclip.com/...</p>
+                      <p class="text-[10px] text-gray-500 whitespace-nowrap truncate" id="preview-long-url">Redirects to: ...</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 5. Primary Action Drop -->
+                <div class="mt-auto items-end">
+                  <button id="btn-shorten" class="glass-btn-primary group w-full py-3.5 rounded-xl font-bold flex justify-center text-sm items-center gap-2">
+                    <span id="btn-shorten-text">Shorten URL</span>
+                    <svg id="btn-shorten-icon" class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                  </button>
+                  <button id="btn-open-latest-result" class="glass-btn w-full py-3 rounded-xl font-semibold text-sm items-center justify-center gap-2 mt-3 hidden">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h6m0 0v6m0-6l-9 9-4-4-6 6"></path></svg>
+                    Open Your Latest Compacted Link
+                  </button>
+                </div>
+              </div>
+
+              <!-- 6. Result Display (Initially Hidden) -->
+              <div id="url-result-section" class="hidden flex-col items-center justify-center absolute inset-0 bg-darkUI-deep/90 backdrop-blur-md rounded-[30px] p-6 text-center animate-fade-slide z-20">
+                <svg class="w-16 h-16 text-green-400 mb-4 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)] animate-slide-up" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                
+                <h3 class="text-2xl font-bold text-white mb-2">URL Compacted!</h3>
+                <p class="text-xs text-gray-400 mb-6">Your link is ready to be shared with the world.</p>
+                
+                <div class="glass-input bg-white/5 border-white/10 w-full p-4 rounded-xl flex items-center justify-between mb-8 shadow-inner shadow-black/50">
+                  <span id="result-short-url" class="text-gold-glow font-medium text-sm truncate mr-2 select-all"></span>
+                  <button id="btn-copy" class="text-gray-400 hover:text-white transition-colors p-1" title="Copy to clipboard">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                  </button>
+                </div>
+
+                <div id="result-qr-wrap" class="hidden w-full mb-8 flex flex-col items-center gap-2">
+                  <p class="text-[11px] text-gray-400 tracking-wide uppercase">Scan QR to open link</p>
+                  <img id="result-qr-code" class="w-44 h-44 rounded-xl border border-white/10 bg-white p-2" alt="Generated QR code for shortened URL" />
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                  <button id="btn-url-vanish-now" class="glass-btn px-6 py-2.5 rounded-full text-sm font-semibold text-red-300 border-red-500/30 hover:text-red-200 hover:border-red-400/40">
+                    Execute Vanish Protocol
+                  </button>
+                  <button id="btn-back-to-url-form" class="glass-btn px-6 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    Back to URL Builder
+                  </button>
+                  <button id="btn-shorten-another" class="glass-btn px-6 py-2.5 rounded-full text-sm font-semibold">
+                    Shorten Another URL
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+      </main>
+
+      <footer class="mt-8 text-right pr-4 lg:pr-8 animate-slide-up" style="animation-delay: 0.3s">
+        <p class="text-xs text-gray-600 tracking-widest uppercase font-semibold">A product by <span class="text-gray-400">Prince</span></p>
+      </footer>
+    </div>
+
+    <div id="history-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm px-4 py-6 md:py-10">
+      <div class="w-full max-w-3xl mx-auto glass-card border border-white/10 rounded-3xl p-5 md:p-6 max-h-full overflow-hidden flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl md:text-2xl font-bold text-white">Secret History</h2>
+          <button id="btn-close-history" class="text-gray-400 hover:text-white transition-colors p-2" aria-label="Close history">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
+        <p class="text-xs text-gray-400 mb-4">Showing clips and short links created in this browser session.</p>
+
+        <p id="history-empty" class="hidden text-sm text-gray-400 text-center py-10">No history yet. Create a clip or short URL to see it here.</p>
+        <div id="history-list" class="flex flex-col gap-3 overflow-y-auto pr-1"></div>
+      </div>
+    </div>
+    
+    <div id="toast-container"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
