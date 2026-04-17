@@ -28,6 +28,24 @@ function getShortId(value) {
   return typeof value === 'string' ? value : '';
 }
 
+function buildUpstreamCandidates(backendBaseUrl, shortId) {
+  const normalizedBase = backendBaseUrl.replace(/\/+$/, '');
+  const encodedShortId = encodeURIComponent(shortId);
+  const candidates = [`${normalizedBase}/${encodedShortId}`];
+  const apiUrlSuffix = '/api/url';
+
+  if (normalizedBase.toLowerCase().endsWith(apiUrlSuffix)) {
+    const rootBase = normalizedBase.slice(0, -apiUrlSuffix.length).replace(/\/+$/, '');
+    if (rootBase) {
+      candidates.push(`${rootBase}/${encodedShortId}`);
+    }
+  } else {
+    candidates.push(`${normalizedBase}${apiUrlSuffix}/${encodedShortId}`);
+  }
+
+  return [...new Set(candidates)];
+}
+
 export default async function handler(req, res) {
   try {
     if (req.method !== 'GET') {
@@ -60,16 +78,30 @@ export default async function handler(req, res) {
       });
     }
 
-    const upstreamUrl = `${backendBaseUrl}/${encodeURIComponent(shortId)}`;
+    const upstreamCandidates = buildUpstreamCandidates(backendBaseUrl, shortId);
 
     try {
-      const upstreamResponse = await fetch(upstreamUrl, {
-        method: 'GET',
-        redirect: 'manual',
-        headers: {
-          'user-agent': 'ParrotNest-Vercel-Redirect/1.0',
-        },
-      });
+      let upstreamResponse;
+      for (const upstreamUrl of upstreamCandidates) {
+        const candidateResponse = await fetch(upstreamUrl, {
+          method: 'GET',
+          redirect: 'manual',
+          headers: {
+            'user-agent': 'ParrotNest-Vercel-Redirect/1.0',
+          },
+        });
+
+        upstreamResponse = candidateResponse;
+
+        // If one candidate is misconfigured, a second candidate may still resolve.
+        if (candidateResponse.status !== 404) {
+          break;
+        }
+      }
+
+      if (!upstreamResponse) {
+        throw new Error('No upstream response available.');
+      }
 
       const location = upstreamResponse.headers.get('location');
       if (location && upstreamResponse.status >= 300 && upstreamResponse.status < 400) {
