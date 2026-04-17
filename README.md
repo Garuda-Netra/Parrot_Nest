@@ -126,6 +126,6 @@ URL:
 - Clip code is 6 digits.
 - Max file size per file: 10 MB.
 - Max combined upload per request: 10 MB.
-- Uploads allow docs/text/source-code extensions only (executables and active web payloads are blocked).
+- Uploads allow docs/text/source-code extensions only (executables and active web payloads are blocked.)
 
 
