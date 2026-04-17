@@ -22,6 +22,7 @@ const ALLOWED_EXTENSIONS = new Set([
   '.properties', '.gradle', '.java', '.js', '.ts', '.jsx', '.tsx', '.py', '.rs',
   '.c', '.cpp', '.h', '.hpp', '.go', '.php', '.rb', '.kt', '.kts', '.swift', '.sh',
   '.bash', '.zsh', '.sql', '.css',
+  '.jpg', '.jpeg', '.png', '.mp4',
 ]);
 
 const ALLOWED_MIME_TYPES = new Set([
@@ -32,6 +33,7 @@ const ALLOWED_MIME_TYPES = new Set([
   'text/x-c', 'text/x-c++src', 'text/x-php', 'text/x-ruby',
   'text/x-kotlin', 'text/x-shellscript', 'application/x-sh',
   'text/x-sql', 'text/css', 'application/octet-stream',
+  'image/jpeg', 'image/png', 'video/mp4',
 ]);
 
 const upload = multer({
@@ -45,7 +47,7 @@ const upload = multer({
     const mimeMissing = mimeType === '';
 
     if (!extensionAllowed || (!mimeAllowed && !mimeMissing)) {
-      const error = new Error('File type not allowed. Upload text, docs, and source-code files only.');
+      const error = new Error('File type not allowed. Upload text, docs, source-code, image (JPG/PNG), and MP4 files only.');
       error.statusCode = 400;
       cb(error);
       return;

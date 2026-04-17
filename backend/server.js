@@ -94,6 +94,10 @@ function warnPlaceholderLikeEnvValues() {
 
 const app = express();
 
+// Render/Vercel run behind reverse proxies, so trust forwarded headers.
+// This prevents express-rate-limit from misreading client IP information.
+app.set('trust proxy', 1);
+
 // ── Global Middleware ───────────────────────────────────────
 app.use(helmet());                       // security headers
 app.use(cors({
