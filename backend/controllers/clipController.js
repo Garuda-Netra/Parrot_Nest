@@ -72,7 +72,7 @@ async function cleanupClipFiles(files) {
 }
 
 /**
- * Generate a unique 4-digit numeric code.
+ * Generate a unique 6-digit numeric code.
  * Retries if code already exists in the database.
  */
 async function generateUniqueCode() {
@@ -81,7 +81,7 @@ async function generateUniqueCode() {
   let attempts = 0;
 
   while (exists && attempts < 20) {
-    code = String(Math.floor(1000 + Math.random() * 9000)); // 1000–9999
+    code = String(Math.floor(100000 + Math.random() * 900000)); // 100000–999999
     exists = await Clip.findOne({ code });
     attempts++;
   }
@@ -227,17 +227,17 @@ exports.createClip = async (req, res, next) => {
 /**
  * GET /api/clip/:code
  *
- * Retrieves a clip by its 4-digit code.
+ * Retrieves a clip by its 6-digit code.
  */
 exports.getClip = async (req, res, next) => {
   try {
     const { code } = req.params;
 
     // Basic input sanitisation
-    if (!/^\d{4}$/.test(code)) {
+    if (!/^\d{6}$/.test(code)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid code format. Must be exactly 4 digits.',
+        message: 'Invalid code format. Must be exactly 6 digits.',
         data: {},
       });
     }
@@ -373,10 +373,10 @@ exports.deleteClip = async (req, res, next) => {
   try {
     const { code } = req.params;
 
-    if (!/^\d{4}$/.test(code)) {
+    if (!/^\d{6}$/.test(code)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid code format. Must be exactly 4 digits.',
+        message: 'Invalid code format. Must be exactly 6 digits.',
         data: {},
       });
     }
