@@ -28,7 +28,7 @@ function getShortId(value) {
   return typeof value === 'string' ? value : '';
 }
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   try {
     if (req.method !== 'GET') {
       res.setHeader('Allow', 'GET');
@@ -103,4 +103,4 @@ module.exports = async (req, res) => {
       data: {},
     });
   }
-};
+}
