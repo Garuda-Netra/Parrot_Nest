@@ -32,7 +32,7 @@ const ALLOWED_MIME_TYPES = new Set([
   'text/x-java-source', 'text/x-python', 'text/x-rustsrc',
   'text/x-c', 'text/x-c++src', 'text/x-php', 'text/x-ruby',
   'text/x-kotlin', 'text/x-shellscript', 'application/x-sh',
-  'text/x-sql', 'text/css', 'application/octet-stream',
+  'text/x-sql', 'text/css',
   'image/jpeg', 'image/png', 'video/mp4', 'audio/mpeg',
 ]);
 
@@ -44,10 +44,16 @@ const upload = multer({
     const mimeType = (file.mimetype || '').toLowerCase();
     const extensionAllowed = ALLOWED_EXTENSIONS.has(extension);
     const mimeAllowed = ALLOWED_MIME_TYPES.has(mimeType);
-    const mimeMissing = mimeType === '';
 
-    if (!extensionAllowed || (!mimeAllowed && !mimeMissing)) {
+    if (!extensionAllowed) {
       const error = new Error('File type not allowed. Upload text, docs, source-code, image (JPG/PNG), audio (MP3), and MP4 files only.');
+      error.statusCode = 400;
+      cb(error);
+      return;
+    }
+
+    if (mimeType && !mimeAllowed) {
+      const error = new Error('File MIME type not allowed.');
       error.statusCode = 400;
       cb(error);
       return;
@@ -88,7 +94,7 @@ router.post('/bulk-delete', clipController.bulkDeleteItems);
 
 /**
  * GET /api/clip/:code
- * Retrieves a clip by its 4-digit code
+ * Retrieves a clip by its 6-digit code
  */
 router.get('/:code', clipController.getClip);
 

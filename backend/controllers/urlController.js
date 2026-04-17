@@ -63,7 +63,6 @@ function resolvePublicShortBaseUrl() {
   const candidates = [
     process.env.PUBLIC_LINK_BASE_URL,
     process.env.BASE_URL,
-    'http://localhost:5000',
   ];
 
   for (const candidate of candidates) {
@@ -86,6 +85,12 @@ function resolvePublicShortBaseUrl() {
     }
   }
 
+  // No valid URL found; fail in production
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('PUBLIC_LINK_BASE_URL or BASE_URL required. Configure on Render.');
+  }
+
+  // Development fallback only
   return 'http://localhost:5000';
 }
 

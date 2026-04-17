@@ -4,6 +4,13 @@ const clipSchema = new mongoose.Schema({
   content: {
     type: String,
     default: null,
+    maxlength: 1_000_000, // 1 MB limit
+    validate: {
+      validator: function(v) {
+        return !v || v.trim().length > 0; // Allow null or non-empty string
+      },
+      message: 'Content cannot be empty.',
+    },
   },
   files: [
     {

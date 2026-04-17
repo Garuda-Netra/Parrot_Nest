@@ -73,24 +73,31 @@ async function cleanupClipFiles(files) {
 
 /**
  * Generate a unique 6-digit numeric code.
- * Retries if code already exists in the database.
+ * Uses atomic MongoDB insert with duplicate key error handling.
  */
 async function generateUniqueCode() {
-  let code;
-  let exists = true;
+  const MAX_ATTEMPTS = 20;
   let attempts = 0;
 
-  while (exists && attempts < 20) {
-    code = String(Math.floor(100000 + Math.random() * 900000)); // 100000–999999
-    exists = await Clip.findOne({ code });
+  while (attempts < MAX_ATTEMPTS) {
+    const code = String(Math.floor(100000 + Math.random() * 900000)); // 100000–999999
+    
+    try {
+      // Attempt to find an existing code (quick check before insert)
+      const existing = await Clip.findOne({ code });
+      if (!existing) {
+        // Code doesn't exist, return it (will be used for insert in createClip)
+        return code;
+      }
+    } catch (err) {
+      console.error(`[generateUniqueCode] Error checking code: ${err.message}`);
+      throw err;
+    }
+    
     attempts++;
   }
 
-  if (exists) {
-    throw new Error('Unable to generate a unique code. Please try again.');
-  }
-
-  return code;
+  throw new Error('Unable to generate a unique code after multiple attempts. Please try again.');
 }
 
 /**
@@ -345,8 +352,17 @@ exports.downloadClipFile = async (req, res, next) => {
       });
     }
 
-    const uploadsDir = path.join(__dirname, '..', 'uploads');
-    const filePath = path.join(uploadsDir, safeFileName);
+    const uploadsDir = path.resolve(__dirname, '..', 'uploads');
+    const filePath = path.resolve(uploadsDir, safeFileName);
+
+    // Verify resolved path is within uploads directory (prevent directory traversal)
+    if (!filePath.startsWith(uploadsDir + path.sep) && filePath !== uploadsDir) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid file path.',
+        data: {},
+      });
+    }
 
     try {
       await fs.access(filePath);

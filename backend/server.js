@@ -20,8 +20,13 @@ function parsePositiveInt(value, fallback) {
 }
 
 function parseCorsOrigins(rawOrigins) {
-  if (!rawOrigins || rawOrigins.trim() === '*') {
-    return '*';
+  if (!rawOrigins || rawOrigins.trim() === '') {
+    // Default to restrictive: no CORS (empty array means reject)
+    return [];
+  }
+
+  if (rawOrigins.trim() === '*') {
+    return '*'; // Explicit wildcard allowed if requested
   }
 
   const origins = rawOrigins
@@ -29,7 +34,7 @@ function parseCorsOrigins(rawOrigins) {
     .map((origin) => origin.trim())
     .filter(Boolean);
 
-  return origins.length > 0 ? origins : '*';
+  return origins.length > 0 ? origins : [];
 }
 
 function validateRequiredEnv() {
@@ -99,7 +104,40 @@ const app = express();
 app.set('trust proxy', 1);
 
 // ── Global Middleware ───────────────────────────────────────
-app.use(helmet());                       // security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      fontSrc: ["'self'", 'https://fonts.googleapis.com', 'https://fonts.gstatic.com'],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+  frameguard: {
+    action: 'deny',
+  },
+}));
+
+// Enforce HTTPS in production
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    if (req.header('x-forwarded-proto') !== 'https') {
+      return res.status(403).json({
+        success: false,
+        message: 'HTTPS required.',
+        data: {},
+      });
+    }
+    next();
+  });
+}
+
 app.use(cors({
   origin: parseCorsOrigins(process.env.CORS_ORIGINS),
 }));                                     // enable CORS for frontend

@@ -8,15 +8,17 @@ function resolveApiBase() {
     return sanitizeBaseUrl(envBase);
   }
 
+  // In production, fail immediately if env var not set
   if (import.meta.env.PROD) {
-    throw new Error('VITE_API_BASE_URL is required in production. Set it in Vercel project environment variables.');
+    throw new Error('VITE_API_BASE_URL is required in production. Set it in Vercel environment variables.');
   }
 
+  // Development: use dynamic origin with backend port
   if (typeof window !== 'undefined') {
     return `${window.location.protocol}//${window.location.hostname}:5000`;
   }
 
-  return 'http://localhost:5000';
+  throw new Error('Unable to determine API base URL. Set VITE_API_BASE_URL.');
 }
 
 const API_BASE = resolveApiBase();
