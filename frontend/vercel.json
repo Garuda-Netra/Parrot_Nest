@@ -7,7 +7,7 @@
       "destination": "/api/redirect/:shortId"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ]
