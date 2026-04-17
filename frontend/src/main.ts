@@ -11,11 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Global Liquid Ripple setup
   initRipple();
   
-  // ParrotClip UI structure handlers
+  // ParrotShare UI structure handlers
   initToggle();
   initTabs();
 
-  // ParrotURLShortener handlers
+  // ParrotURL Shortener handlers
   initUrlBuilder();
 
   // Bring the hero parrot to life

@@ -1,7 +1,7 @@
 # ParrotNest
 
 ParrotNest is a privacy-first sharing tool with two flows:
-- ParrotClip: create short-lived secure clips (text/files) with a 4-digit code.
+- ParrotShare: create short-lived secure clips (text/files) with a 4-digit code.
 - ParrotURL: create self-destructing short links with auto-generated QR codes.
 
 The codebase is now split for independent deployment:

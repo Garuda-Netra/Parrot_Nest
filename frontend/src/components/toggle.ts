@@ -1,18 +1,18 @@
 export function initToggle() {
-  const toggleParrotClip = document.getElementById('toggle-parrotclip') as HTMLButtonElement | null;
+  const toggleParrotShare = document.getElementById('toggle-parrotshare') as HTMLButtonElement | null;
   const toggleUrlShortener = document.getElementById('toggle-urlshortener') as HTMLButtonElement | null;
   const toggleIndicator = document.getElementById('toggle-indicator') as HTMLDivElement | null;
   
-  const parrotClipUI = document.getElementById('parrotclip-ui') as HTMLDivElement | null;
+  const parrotShareUI = document.getElementById('parrotshare-ui') as HTMLDivElement | null;
   const urlShortenerUI = document.getElementById('urlshortener-ui') as HTMLDivElement | null;
 
-  if (!toggleParrotClip || !toggleUrlShortener || !toggleIndicator || !parrotClipUI || !urlShortenerUI) return;
+  if (!toggleParrotShare || !toggleUrlShortener || !toggleIndicator || !parrotShareUI || !urlShortenerUI) return;
 
-  function switchTool(tool: 'parrotclip' | 'urlshortener') {
-    if (tool === 'parrotclip') {
+  function switchTool(tool: 'parrotshare' | 'urlshortener') {
+    if (tool === 'parrotshare') {
       toggleIndicator!.style.transform = 'translateX(0)';
       
-      toggleParrotClip!.classList.replace('text-gray-400', 'text-gold-glow');
+      toggleParrotShare!.classList.replace('text-gray-400', 'text-gold-glow');
       toggleUrlShortener!.classList.replace('text-gold-glow', 'text-gray-400');
       
       urlShortenerUI!.style.opacity = '0';
@@ -20,21 +20,21 @@ export function initToggle() {
         urlShortenerUI!.classList.add('hidden');
         urlShortenerUI!.classList.remove('flex');
         
-        parrotClipUI!.classList.remove('hidden');
-        parrotClipUI!.classList.add('flex');
-        setTimeout(() => parrotClipUI!.style.opacity = '1', 50);
+        parrotShareUI!.classList.remove('hidden');
+        parrotShareUI!.classList.add('flex');
+        setTimeout(() => parrotShareUI!.style.opacity = '1', 50);
       }, 300);
       
     } else {
       toggleIndicator!.style.transform = `translateX(100%)`;
       
       toggleUrlShortener!.classList.replace('text-gray-400', 'text-gold-glow');
-      toggleParrotClip!.classList.replace('text-gold-glow', 'text-gray-400');
+      toggleParrotShare!.classList.replace('text-gold-glow', 'text-gray-400');
 
-      parrotClipUI!.style.opacity = '0';
+      parrotShareUI!.style.opacity = '0';
       setTimeout(() => {
-        parrotClipUI!.classList.add('hidden');
-        parrotClipUI!.classList.remove('flex');
+        parrotShareUI!.classList.add('hidden');
+        parrotShareUI!.classList.remove('flex');
         
         urlShortenerUI!.classList.remove('hidden');
         urlShortenerUI!.classList.add('flex');
@@ -46,6 +46,6 @@ export function initToggle() {
     }
   }
 
-  toggleParrotClip.addEventListener('click', () => switchTool('parrotclip'));
+  toggleParrotShare.addEventListener('click', () => switchTool('parrotshare'));
   toggleUrlShortener.addEventListener('click', () => switchTool('urlshortener'));
 }

@@ -1,7 +1,7 @@
 {
-  "name": "parrotclip-backend",
+  "name": "parrotshare-backend",
   "version": "1.0.0",
-  "description": "Backend API for ParrotClip & ParrotURLShortener",
+  "description": "Backend API for ParrotShare & ParrotURL Shortener",
   "main": "server.js",
   "engines": {
     "node": ">=20.19.0"

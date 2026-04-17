@@ -135,7 +135,7 @@ app.get('/:shortId', urlController.redirectUrl);
 app.get('/', (_req, res) => {
   res.json({
     success: true,
-    message: 'ParrotClip API is running.',
+    message: 'ParrotShare API is running.',
     data: { version: '1.0.0' },
   });
 });
