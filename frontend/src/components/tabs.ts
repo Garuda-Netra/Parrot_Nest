@@ -459,8 +459,8 @@ export function initTabs() {
     btnFetch.addEventListener('click', async () => {
       const code = Array.from(otpInputs).map(i => i.value).join('');
 
-      if (code.length !== 6 || !/^\d{6}$/.test(code)) {
-        showToast('Please enter a valid 6-digit code.', 'error');
+      if (code.length !== 5 || !/^\d{5}$/.test(code)) {
+        showToast('Please enter a valid 5-digit code.', 'error');
         otpInputs.forEach(i => {
           i.classList.add('glow-error');
           setTimeout(() => i.classList.remove('glow-error'), 800);

@@ -67,7 +67,7 @@ This guide helps you verify that the self-destruct mechanism (MongoDB TTL auto-d
    - Click "Create Clip"
 
 3. **Record the details:**
-   - Clip Code: _________________ (6 digits, e.g., `123456`)
+   - Clip Code: _________________ (5 digits, e.g., `12345`)
    - Time created: _________________ (e.g., 2:35 PM)
    - Delete Token: _________________ (save this)
 

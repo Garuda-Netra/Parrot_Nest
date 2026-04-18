@@ -1,7 +1,7 @@
 # ParrotNest
 
 ParrotNest is a privacy-first sharing tool with two flows:
-- ParrotShare: create short-lived secure clips (text/files) with a 6-digit code.
+- ParrotShare: create short-lived secure clips (text/files) with a 5-digit code.
 - ParrotURL: create self-destructing short links with auto-generated QR codes.
 
 The codebase is now split for independent deployment:
@@ -123,7 +123,7 @@ URL:
 - `GET /:shortId`
 
 ## Known Limits
-- Clip code is 6 digits.
+- Clip code is 5 digits.
 - Max file size per file: 10 MB.
 - Max combined upload per request: 10 MB.
 - Uploads allow docs/text/source-code extensions only (executables and active web payloads are blocked.)

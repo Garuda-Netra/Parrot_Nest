@@ -94,7 +94,7 @@ router.post('/bulk-delete', clipController.bulkDeleteItems);
 
 /**
  * GET /api/clip/:code
- * Retrieves a clip by its 6-digit code
+ * Retrieves a clip by its 5-digit code
  */
 router.get('/:code', clipController.getClip);
 

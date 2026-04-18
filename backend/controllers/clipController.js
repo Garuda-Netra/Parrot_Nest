@@ -72,7 +72,7 @@ async function cleanupClipFiles(files) {
 }
 
 /**
- * Generate a unique 6-digit numeric code.
+ * Generate a unique 5-digit numeric code.
  * Uses atomic MongoDB insert with duplicate key error handling.
  */
 async function generateUniqueCode() {
@@ -80,7 +80,7 @@ async function generateUniqueCode() {
   let attempts = 0;
 
   while (attempts < MAX_ATTEMPTS) {
-    const code = String(Math.floor(100000 + Math.random() * 900000)); // 100000–999999
+    const code = String(Math.floor(10000 + Math.random() * 90000)); // 10000–99999
     
     try {
       // Attempt to find an existing code (quick check before insert)
@@ -234,17 +234,17 @@ exports.createClip = async (req, res, next) => {
 /**
  * GET /api/clip/:code
  *
- * Retrieves a clip by its 6-digit code.
+ * Retrieves a clip by its 5-digit code.
  */
 exports.getClip = async (req, res, next) => {
   try {
     const { code } = req.params;
 
     // Basic input sanitisation
-    if (!/^\d{6}$/.test(code)) {
+    if (!/^\d{5}$/.test(code)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid code format. Must be exactly 6 digits.',
+        message: 'Invalid code format. Must be exactly 5 digits.',
         data: {},
       });
     }
@@ -389,10 +389,10 @@ exports.deleteClip = async (req, res, next) => {
   try {
     const { code } = req.params;
 
-    if (!/^\d{6}$/.test(code)) {
+    if (!/^\d{5}$/.test(code)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid code format. Must be exactly 6 digits.',
+        message: 'Invalid code format. Must be exactly 5 digits.',
         data: {},
       });
     }
