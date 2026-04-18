@@ -487,7 +487,7 @@ exports.bulkDeleteItems = async (req, res, next) => {
         }
 
         if (type === 'clip') {
-          if (!/^\d{4}$/.test(identifier)) {
+          if (!/^\d{5}$/.test(identifier)) {
             failCount++;
             continue;
           }
