@@ -56,10 +56,10 @@ Terminal 1:
 ```bash
 cd backend
 npm run dev
-```
+``
 
 Terminal 2:
-```bash
+``bash
 cd frontend
 npm run dev
 ```
