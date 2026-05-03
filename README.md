@@ -1,131 +1,163 @@
-# ParrotNest
+# ParrotNest 🦜
 
-ParrotNest is a privacy-first sharing tool with two flows:
-- ParrotShare: create short-lived secure clips (text/files) with a 5-digit code.
-- ParrotURL: create self-destructing short links with auto-generated QR codes.
+Hey there! ParrotNest is something I built because I was tired of sharing sensitive text and files through apps that store your data forever and never ask permission. So I made my own thing — a clean, fast, privacy-first sharing tool that self-destructs.
 
-The codebase is now split for independent deployment:
-- `frontend/` -> Vercel
-- `backend/` -> Render
+There are two features inside:
 
-## Project Structure
-- `frontend/`: Vite + TypeScript + Tailwind website app
-- `backend/`: Node.js + Express + MongoDB API
+- **ParrotShare** — Paste text or drop files, get a 5-digit code, share it. The person on the other end enters the code and retrieves your content. No accounts, no tracking, no permanent storage.
+- **ParrotURL** — Paste any long URL and get a short link with a QR code. It expires on its own schedule. When it's gone, it's gone.
 
-## Local Development
+Everything has a self-destruct timer. You pick how long the data lives (5 minutes, 1 hour, 1 day, 2 days), and when time's up, it's wiped from the database and the server. No leftovers.
 
-### 1) Install dependencies
+---
+
+## What's inside
+
+```
+ParrotNest/
+├── frontend/   → Vite + TypeScript + Tailwind (deployed on Vercel)
+└── backend/    → Node.js + Express + MongoDB (deployed on Render)
+```
+
+---
+
+## Running it locally
+
+### Step 1 — Install dependencies
+
+Open two terminals and run:
+
 ```bash
-cd frontend
+# Terminal 1 - Backend
+cd backend
 npm install
 
-cd ../backend
+# Terminal 2 - Frontend
+cd frontend
 npm install
 ```
 
-### 2) Configure environment files
+### Step 2 — Set up your environment files
 
-Backend:
+**Backend** — copy the example and fill in your values:
 ```bash
 cd backend
 copy .env.example .env
 ```
 
-Frontend:
+| Variable | What it does |
+|---|---|
+| `MONGO_URI` | Your MongoDB Atlas connection string |
+| `BASE_URL` | Your backend URL (locally: `http://localhost:5000`) |
+| `PUBLIC_LINK_BASE_URL` | Where short links should appear to come from (locally: `http://localhost:5173`) |
+| `CORS_ORIGINS` | Frontend origin allowed to talk to backend (locally: `http://localhost:5173`) |
+| `PORT` | Port to run the backend on (default: `5000`) |
+| `RATE_LIMIT_REQUESTS` | Max requests per window (default: `100`) |
+| `RATE_LIMIT_WINDOW_SECONDS` | Rate limit window in seconds (default: `900`) |
+
+**Frontend** — copy the example and fill in your values:
 ```bash
 cd frontend
 copy .env.example .env.local
 ```
 
-Set these values:
-- Backend `.env`
-	- `MONGO_URI`
-	- `BASE_URL` (local: `http://localhost:5000`, backend service URL)
-	- `PUBLIC_LINK_BASE_URL` (optional local: `http://localhost:5173`, public short-link host)
-	- `PORT`
-	- `CORS_ORIGINS` (local frontend: `http://localhost:5173`)
-	- `RATE_LIMIT_REQUESTS`
-	- `RATE_LIMIT_WINDOW_SECONDS`
-- Frontend `.env.local`
-	- `VITE_API_BASE_URL` (local backend: `http://localhost:5000`)
-	- `VITE_APP_DOMAIN` (optional, local frontend URL)
+| Variable | What it does |
+|---|---|
+| `VITE_API_BASE_URL` | Points to your backend (locally: `http://localhost:5000`) |
+| `VITE_APP_DOMAIN` | Your frontend URL for link previews (optional) |
 
-### 3) Run apps
+### Step 3 — Start both servers
 
-Terminal 1:
 ```bash
-cd backend
-npm run dev
-``
+# Terminal 1
+cd backend && npm run dev
 
-Terminal 2:
-``bash
-cd frontend
-npm run dev
+# Terminal 2
+cd frontend && npm run dev
 ```
 
-Local URLs:
-- Frontend: `http://localhost:5173`
-- Backend: `http://localhost:5000`
+Then open **http://localhost:5173** and you're good to go.
 
-## Deploy Backend on Render
+---
 
-Use `render.yaml` from repo root or configure manually with:
-- Root directory: `backend`
-- Build command: `npm install`
-- Start command: `npm start`
+## Deploying to production
 
-Render environment variables:
-- `MONGO_URI` = your MongoDB Atlas URI
-- `BASE_URL` = your Render backend URL
-- `PUBLIC_LINK_BASE_URL` = your public short-link domain (for Vercel links: your Vercel frontend URL)
-- `CORS_ORIGINS` = `http://localhost:5173,https://your-frontend-name.vercel.app` (replace Vercel URL)
-- `RATE_LIMIT_REQUESTS` = `100`
-- `RATE_LIMIT_WINDOW_SECONDS` = `900`
-- `PORT` = `5000`
+### Backend → Render
 
-## Deploy Frontend on Vercel
+You can use the `render.yaml` in the repo root, or set it up manually:
 
-Set project root directory to `frontend`.
+- **Root directory:** `backend`
+- **Build command:** `npm install`
+- **Start command:** `npm start`
 
-Vercel environment variables:
-- `VITE_API_BASE_URL` = your Render backend URL
-- `VITE_APP_DOMAIN` = your Vercel frontend URL (optional)
-- `BACKEND_REDIRECT_BASE_URL` = your Render backend URL (used by Vercel redirect proxy)
+Set these environment variables in your Render dashboard:
 
-Short links stay on your Vercel domain (for example `https://your-frontend.vercel.app/abc123`) when:
-- backend `PUBLIC_LINK_BASE_URL` points to your Vercel URL
-- Vercel function env `BACKEND_REDIRECT_BASE_URL` points to your Render backend URL
+| Variable | Value |
+|---|---|
+| `MONGO_URI` | Your MongoDB Atlas URI |
+| `BASE_URL` | Your Render service URL |
+| `PUBLIC_LINK_BASE_URL` | Your Vercel frontend URL (so short links look like they come from your domain) |
+| `CORS_ORIGINS` | `https://your-frontend.vercel.app` (comma-separate multiple origins) |
+| `RATE_LIMIT_REQUESTS` | `100` |
+| `RATE_LIMIT_WINDOW_SECONDS` | `900` |
+| `PORT` | `5000` |
 
-`frontend/vercel.json` already routes short IDs to an internal Vercel API proxy (`/api/redirect/:shortId`), so you do not need to edit hardcoded backend domains in rewrites.
+### Frontend → Vercel
 
-`frontend/src/components/api.ts` is configured to fail fast in production if `VITE_API_BASE_URL` is missing.
+Set the project root to `frontend`, then add these env vars:
 
-## Post-Deploy Smoke Test
+| Variable | Value |
+|---|---|
+| `VITE_API_BASE_URL` | Your Render backend URL |
+| `VITE_APP_DOMAIN` | Your Vercel frontend URL (optional) |
+| `BACKEND_REDIRECT_BASE_URL` | Your Render backend URL (used by the redirect proxy) |
 
-1. Create a short URL from the deployed frontend.
-2. Confirm returned `shortUrl` uses your Vercel domain.
-3. Open that short URL and confirm it redirects to the destination URL.
-4. Delete the short URL from UI history and confirm success.
-5. Verify backend logs show redirect requests and no CORS errors in browser console.
+> Short links will appear on your Vercel domain (e.g. `https://your-app.vercel.app/abc123`). The `vercel.json` file already handles routing — you don't need to touch it.
 
-## Core API Routes
+---
 
-Clip:
-- `POST /api/clip/create`
-- `GET /api/clip/:code`
-- `DELETE /api/clip/:code`
-- `GET /api/clip/download/:fileName`
+## Smoke test after deploying
 
-URL:
-- `POST /api/url/shorten`
-- `DELETE /api/url/:shortId`
-- `GET /:shortId`
+Once everything's live, run through this quickly:
 
-## Known Limits
-- Clip code is 5 digits.
-- Max file size per file: 10 MB.
-- Max combined upload per request: 10 MB.
-- Uploads allow docs/text/source-code extensions only (executables and active web payloads are blocked.)
+1. Create a clip and note the 5-digit code
+2. Open a different browser/tab and retrieve it with that code
+3. Create a short URL and confirm it redirects correctly
+4. Delete something from history and confirm it disappears from the UI and the database
+5. Check your browser console — there should be zero CORS errors
 
+---
 
+## API reference
+
+**Clip endpoints:**
+```
+POST   /api/clip/create          → Create a new clip
+GET    /api/clip/:code           → Retrieve a clip by code
+DELETE /api/clip/:code           → Delete a clip (requires delete token)
+GET    /api/clip/download/:file  → Download a file attached to a clip
+POST   /api/clip/bulk-delete     → Delete multiple clips/URLs at once
+```
+
+**URL endpoints:**
+```
+POST   /api/url/shorten          → Create a short URL
+DELETE /api/url/:shortId         → Delete a short URL (requires delete token)
+GET    /:shortId                 → Redirect to original URL
+```
+
+---
+
+## A few things worth knowing
+
+- Clip codes are always 5 digits
+- Max file size per upload: **10 MB**
+- Max total combined upload per request: **10 MB**
+- Allowed file types: text, docs, source code, images (JPG/PNG), audio (MP3), video (MP4)
+- Executables and anything that could run as a web script are blocked
+- Self-destruct timers are enforced both by MongoDB TTL indexes and a periodic server-side cleanup job that also removes uploaded files from disk
+- Delete tokens are hashed with SHA-256 before being stored — even if someone got the database, they couldn't use them
+
+---
+
+Built by **Prince** 🦜

@@ -24,9 +24,5 @@ export function evaluateSlugState(slug: string): 'available' | 'taken' | 'restri
      return 'restricted';
   }
 
-  if (slug.toLowerCase() === 'test') { // Hardcoded per user agreement
-    return 'taken';
-  }
-
   return 'available';
 }

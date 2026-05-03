@@ -109,7 +109,7 @@ function parseUrlExpiry(expiry) {
     '1d': 24 * 60 * 60 * 1000,
   };
 
-  return map[expiry] ?? map['1h'];
+  return map[expiry] ?? map['5m'];
 }
 
 function isValidUrlExpiryChoice(expiry) {
@@ -166,7 +166,7 @@ exports.shortenUrl = async (req, res, next) => {
       });
     }
 
-    expiry = normalizedExpiry || '1h';
+    expiry = normalizedExpiry || '5m';
 
     // --- customSlug handling ---
     let shortId;

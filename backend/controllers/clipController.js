@@ -81,7 +81,7 @@ async function generateUniqueCode() {
 
   while (attempts < MAX_ATTEMPTS) {
     const code = String(Math.floor(10000 + Math.random() * 90000)); // 10000–99999
-    
+
     try {
       // Attempt to find an existing code (quick check before insert)
       const existing = await Clip.findOne({ code });
@@ -93,7 +93,7 @@ async function generateUniqueCode() {
       console.error(`[generateUniqueCode] Error checking code: ${err.message}`);
       throw err;
     }
-    
+
     attempts++;
   }
 
@@ -105,10 +105,10 @@ async function generateUniqueCode() {
  */
 function parseExpiry(expiry) {
   const map = {
-    '5m':  5 * 60 * 1000,
-    '1h':  60 * 60 * 1000,
-    '1d':  24 * 60 * 60 * 1000,
-    '2d':  2 * 24 * 60 * 60 * 1000,
+    '5m': 5 * 60 * 1000,
+    '1h': 60 * 60 * 1000,
+    '1d': 24 * 60 * 60 * 1000,
+    '2d': 2 * 24 * 60 * 60 * 1000,
   };
   return map[expiry] || map['1h']; // default 1 hour
 }

@@ -3,6 +3,30 @@ import { showToast } from './toast';
 import { recordClipHistory, removeClipHistoryByCode } from './history';
 import { confirmDialog } from './confirmDialog';
 
+/**
+ * Clears the retrieve result panel completely.
+ * Called after deletions / vanish / purge so stale content doesn't linger.
+ */
+export function clearRetrieveResult() {
+  const retrieveResult = document.getElementById('retrieve-result') as HTMLDivElement | null;
+  const retrieveContent = document.getElementById('retrieve-result-content') as HTMLPreElement | null;
+  const btnCopyRetrieved = document.getElementById('btn-copy-retrieved') as HTMLButtonElement | null;
+  const retrieveFilesContainer = document.getElementById('retrieve-result-files') as HTMLDivElement | null;
+  const downloadAllBtn = document.getElementById('btn-download-all') as HTMLButtonElement | null;
+
+  if (retrieveResult) retrieveResult.classList.add('hidden');
+  if (retrieveContent) {
+    retrieveContent.textContent = '';
+    retrieveContent.classList.add('hidden');
+  }
+  if (btnCopyRetrieved) {
+    btnCopyRetrieved.classList.add('hidden');
+    btnCopyRetrieved.classList.remove('flex');
+  }
+  if (retrieveFilesContainer) retrieveFilesContainer.innerHTML = '';
+  if (downloadAllBtn) downloadAllBtn.classList.add('hidden');
+}
+
 export function initTabs() {
   function debounce<T extends (...args: any[]) => void>(fn: T, delayMs = 140) {
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -147,7 +171,7 @@ export function initTabs() {
   const fileInput = document.getElementById('file-input') as HTMLInputElement | null;
   const dtModeFolder = document.getElementById('mode-folder') as HTMLDivElement | null;
   const folderInput = document.getElementById('folder-input') as HTMLInputElement | null;
-    let fileQueueRenderFrame = 0;
+  let fileQueueRenderFrame = 0;
 
   function updateFileQueue() {
       if (fileQueueRenderFrame) {
@@ -302,6 +326,9 @@ export function initTabs() {
       btnClipVanishNow.disabled = false;
       btnClipVanishNow.classList.remove('opacity-60', 'pointer-events-none');
     }
+
+    // Also clear the retrieve panel so stale content doesn't linger
+    clearRetrieveResult();
   }
 
   if (btnGenerate && btnGenerateText) {
@@ -341,9 +368,9 @@ export function initTabs() {
           return;
         }
 
-           if (totalSize > MAX_TOTAL_SIZE) {
-             showToast(`❌ Total file size (${(totalSize / 1024 / 1024).toFixed(2)}MB) exceeds 10MB limit.`, 'error');
-             return;
+        if (totalSize > MAX_TOTAL_SIZE) {
+          showToast(`❌ Total file size (${(totalSize / 1024 / 1024).toFixed(2)}MB) exceeds 10MB limit.`, 'error');
+          return;
         }
         
         // All validations passed, add files to form
@@ -485,11 +512,43 @@ export function initTabs() {
         if (res.success) {
           retrieveResult!.classList.remove('hidden');
 
+          const btnCopyRetrieved = document.getElementById('btn-copy-retrieved') as HTMLButtonElement | null;
+          const btnCopyRetrievedText = document.getElementById('btn-copy-retrieved-text') as HTMLSpanElement | null;
+
           if (res.data.content) {
             retrieveContent!.textContent = res.data.content;
             retrieveContent!.classList.remove('hidden');
+
+            // Show the copy button for text content
+            if (btnCopyRetrieved) {
+              btnCopyRetrieved.classList.remove('hidden');
+              btnCopyRetrieved.classList.add('flex');
+              btnCopyRetrieved.onclick = () => {
+                navigator.clipboard.writeText(res.data.content).then(() => {
+                  if (btnCopyRetrievedText) {
+                    btnCopyRetrievedText.textContent = '✓ Captured!';
+                    btnCopyRetrieved.classList.remove('text-green-300', 'border-green-500/30');
+                    btnCopyRetrieved.classList.add('text-emerald-300', 'border-emerald-400/40');
+                  }
+                  showToast('Content captured to clipboard.', 'success');
+                  setTimeout(() => {
+                    if (btnCopyRetrievedText) {
+                      btnCopyRetrievedText.textContent = 'Capture to Clipboard';
+                      btnCopyRetrieved.classList.remove('text-emerald-300', 'border-emerald-400/40');
+                      btnCopyRetrieved.classList.add('text-green-300', 'border-green-500/30');
+                    }
+                  }, 2000);
+                }).catch(() => {
+                  showToast('Failed to copy. Please select and copy manually.', 'error');
+                });
+              };
+            }
           } else {
             retrieveContent!.classList.add('hidden');
+            if (btnCopyRetrieved) {
+              btnCopyRetrieved.classList.add('hidden');
+              btnCopyRetrieved.classList.remove('flex');
+            }
           }
 
           const retrieveFilesContainer = document.getElementById('retrieve-result-files') as HTMLDivElement;
@@ -539,6 +598,8 @@ export function initTabs() {
 
           showToast('Clip retrieved successfully!', 'success');
         } else {
+          // Clip not found / expired — clear any stale retrieved content
+          clearRetrieveResult();
           showToast(res.message || 'Clip not found or expired.', 'error');
         }
       } catch {

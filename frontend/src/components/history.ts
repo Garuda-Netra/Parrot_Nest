@@ -2,6 +2,7 @@ import { apiDelete, apiPost } from './api';
 import { showToast } from './toast';
 import { confirmDialog } from './confirmDialog';
 import { escapeHtml } from '../utils/escapeHtml';
+import { clearRetrieveResult } from './tabs';
 
 type HistoryItemType = 'clip' | 'url';
 
@@ -154,11 +155,10 @@ function renderHistoryItems(listEl: HTMLElement, emptyEl: HTMLElement) {
     })
     .join('');
 
-  const sortedItems = items;
   listEl.querySelectorAll<HTMLButtonElement>('.history-delete-btn').forEach((button) => {
     button.addEventListener('click', async () => {
       const index = Number.parseInt(button.dataset.historyIndex || '-1', 10);
-      const item = sortedItems[index];
+      const item = items[index];
       if (!item) {
         return;
       }
@@ -183,10 +183,11 @@ function renderHistoryItems(listEl: HTMLElement, emptyEl: HTMLElement) {
         const response = await apiDelete(path, item.deleteToken);
 
         if (!response.success) {
-          const isAlreadyDeletedUrl = item.type === 'url' && /not found|already deleted|self-destructed/i.test(response.message || '');
-          if (isAlreadyDeletedUrl) {
+          const isAlreadyGone = /not found|already deleted|self-destructed|expired/i.test(response.message || '');
+          if (isAlreadyGone) {
             removeHistoryItem(item);
             renderHistoryItems(listEl, emptyEl);
+            clearRetrieveResult();
             showToast('Entry was already removed. History cleaned up.', 'success');
             return;
           }
@@ -199,6 +200,7 @@ function renderHistoryItems(listEl: HTMLElement, emptyEl: HTMLElement) {
 
         removeHistoryItem(item);
         renderHistoryItems(listEl, emptyEl);
+        clearRetrieveResult();
         showToast('Deleted successfully.', 'success');
       } catch {
         showToast('Network error while deleting entry.', 'error');
@@ -362,6 +364,7 @@ export function initHistory() {
         // Clear all local history regardless of partial failures
         writeHistory([]);
         renderHistoryItems(listEl, emptyEl);
+        clearRetrieveResult();
 
         if (response.success) {
           const { successCount, failCount } = response.data as { successCount: number; failCount: number };
@@ -377,6 +380,7 @@ export function initHistory() {
         // Even on network failure, clear local history
         writeHistory([]);
         renderHistoryItems(listEl, emptyEl);
+        clearRetrieveResult();
         showToast('Local records cleared. Some server records may persist due to a network error.', 'error');
       } finally {
         purgeBtn.disabled = false;
